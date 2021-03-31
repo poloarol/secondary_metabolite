@@ -1,0 +1,102 @@
+# Time stamp: March. 18th, 2021 - MiBIG
+# Time stamp: March. 19th, 2021 - antiSMASH DB
+
+# Natural Products labels
+
+PKS + Aryl Polyenes - 0
+NRPS + Siderophores - 1
+NRPS - PKS - 2
+RiPP - 3 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
+Terpene - 4
+Bacteriocin - 5
+
+training : test : validation =  70 : 15 : 15
+
+
+Training set: Sample data used to fit the model
+Testing set: Sample data used to provide an unbiased evaluation of the model fit, while tuning model hyperparameters.
+                The evaluation becomes more biased as skill on the model validation dataset is incorporated into the model
+                comparison.
+Validation set: Sample data used to provide an unbiased evaluation of a final model fit of the dataset
+
+
+
+
+
+Do a RiPPsFinder || RiPP-ML
+
+
+# Number of Bacterial Sequences from antiSMASH
+
+~ 50,000 Sequences
+
+# Distribution of Sequences
+
+SM - Secondary Metabolites
+
+Minimal Genome - JCVI_Syn3.0 - CP014940.1
+
+# Model Genomes to test
+
+Carsonella ruddii - CP012591.1
+Mycoplasma genitalium - 
+Escherichia coli - 
+Bacillus cereus - 
+Streptomyces hygroscopicus - NZ_CP018627.1
+
+# Fit Transform - Fits Model
+# Transform - Predicts the model
+
+E-value << 1 indicates a highly significant sequence
+If 2 or more proteins have significant hits within our DB 
+we get rid of that operon.
+
+
+Genomes
+-------
+              Species      Plasmid
+Actinobacteria 
+             CP003210
+             CP003216
+             
+Streptomyces CP016559.1   CP016560.1
+             CP020700.1   CP020701.1
+                          CP020702.1
+             CP023703.1
+             CP023702.1	
+             CP023701.1
+             CP023700.1
+             CP023699.1
+             CP020567.1   CP020568.1
+             CP023697.1
+             CP023696.1
+             CP023695.1
+             CP023694.1
+             CP023693.1
+             CP023747.1
+             CP023692.1
+             CP023691.1
+             CP023690.1
+             CP023689.1
+             CP023688.1
+             CP029197.1
+Firmicutes   CP000246.1  CP039729.1
+                         CP039730.1
+             CM000955.1
+             LR134524.1
+             CP014022.1
+             LS483462.1
+             CP053931.1  CP053930.1
+             CP012801.1
+             CP028341.1
+             CP031703.1
+             CP026999.1
+             CP025199.1
+             CP030775.1
+             CP030776.1
+             CP000246.1
+             CP021140.1
+             LR607340.1
+
+
+ 
