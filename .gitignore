@@ -1,3 +1,4 @@
 /env
 /secondary_metabolite-master/tmp
 /secondary_metabolite-master/utilities/__pycache__
+/secondary_metabolite-master/mibig/*.gz

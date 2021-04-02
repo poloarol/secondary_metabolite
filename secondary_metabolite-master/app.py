@@ -8,6 +8,7 @@ import time
 from typing import List
 import joblib
 import shutil
+import random
 import argparse
 import itertools
 import statistics
@@ -48,12 +49,12 @@ def svd(filename: str):
 
     np.savetxt('bgc\\embedding\\pcs.csv', pcs, delimiter=',')
 
-def learn(filename: str, dim: int):
+def learn(metric, combination):
     """
     """
 
     print('--------------------------- Processing data for UMAP begins  ----------------------------------------------')
-    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\{0}'.format(filename)))
+    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
 
     print('--------------------------------- Processing data ends -----------------------------------------------------')
     
@@ -61,50 +62,43 @@ def learn(filename: str, dim: int):
     scaled_data = np.column_stack((data[1].iloc[:, 0], scaler.fit_transform(data[1].iloc[:, 1:])))
 
     scaled_data = pd.DataFrame(scaled_data)
-
     dim_reduction = DimensionalReduction(data[0], scaled_data)
 
     print('---------------------------------- UMAP learning begins ------------------------------------------------')
-
-    metrics = ['euclidean', 'chebyshev', 'manhattan', 'mahalanobis', 'minkowski', 'canberra']
-    weights = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    distances = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    neighbours = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 75, 90, 100]
-
-    comb = [distances, neighbours, weights]
-    comb = [p for p in itertools.product(*comb)]
-
-    metrics = [p for p in itertools.permutations(metrics, 2)]
-
     models = {}
 
-    with open(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_best_params.txt'), 'w') as f:
+    with open(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_best_params.txt'), 'a') as f:
 
-        for metric in metrics:
-            for c in comb:
+        umap, train = dim_reduction.umap(input_metric=metric[0], output_metric=metric[1], min_dist=combination[0], neighbours=combination[1], weight=combination[2])
+        test = dim_reduction.test_embedding(umap, 'umap_test_euclidean')
 
-                tmp = dim_reduction.umap(min_dist=c[2], neighbours=c[1], output_metric=metric[0], weight=c[0], input_metric=metric[1])
-                test = dim_reduction.test_embedding(tmp[0], 'umap_test_euclidean')
-
-                try:
-                    supervised = Supervised(data[0], tmp[1], test)
+        try:
+            supervised = Supervised(data[0], train, test)
                     
-                    models['rf'] = supervised.rforest()
-                    models['ada_rf'] = supervised.adaRforest()
-                    models['xgboost'] = supervised.xgboost()
-                    models['knn'] = supervised.knn()
-                    models['nn'] = supervised.neural_network()
+            models['rf'] = supervised.rforest()
+            models['ada_rf'] = supervised.adaRforest()
+            models['xgboost'] = supervised.xgboost()
+            models['knn'] = supervised.knn()
+            models['nn'] = supervised.neural_network()
 
-                    for key, model in models.items():
-                        scores = supervised.evaluate_model(model, 5, 3)
+            for key, model in models.items():
+                scores = supervised.evaluate_model(model, 5, 3)
 
-                        # input_metric, output_metric, min_dist, weight, model, av. accuracy
+                # input_metric, output_metric, min_dist, neighbours, weights, model, av. accuracy
 
-                        if statistics.mean(scores) >= 0.7:
-                            s = '{}, {}, {}, {}, {},  {}, {}\n'.format(metric[0], metric[1], c[1], c[0], c[2], key, statistics.mean(scores))
-                            f.write(s)
-                except Exception as e:
-                    print(e.__repr__())
+                if statistics.mean(scores) >= 0.75:
+                    s = '{}, {}, {}, {}, {},  {}, {}\n'.format(metric[0], metric[1], combination[0], combination[1], combination[2], key, statistics.mean(scores))
+                    f.write(s)
+
+                    dim_reduction.save(umap, 'umap_{}_{}_{}_{}_{}'.format(metric[0], metric[1], combination[0], combination[1], combination[2]))
+                    
+                    train = pd.DataFrame(train, columns=['label', 'Dim1', 'Dim2', 'Dim3'])
+                    test = pd.DataFrame(test, columns=['lables', 'Dim1', 'Dim2', 'DIm3'])
+
+                    train.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\train_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
+                    test.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\test_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
+        except Exception as e:
+            print(e.__repr__())
 
             
 
@@ -122,23 +116,33 @@ def split(filename: str):
 
 def classify(dim: int = 3):
 
-    train = shuffle(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_train_euclidean_minkowski.csv'))
-    test = shuffle(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_test_euclidean_minkowski.csv'))
+    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
+    # test = shuffle(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_test_euclidean_minkowski.csv'))
+
+    scaler = RobustScaler()
+    scaled_data = np.column_stack((data[1].iloc[:, 0], scaler.fit_transform(data[1].iloc[:, 1:])))
+
+    scaled_data = pd.DataFrame(scaled_data)
+    dim_reduction = DimensionalReduction(data[0], scaled_data)
+     # input_metric, output_metric, min_dist, weight, model, av. accuracy
+     # euclidean, chebyshev, 20, 0, 0.7,  rf, 0.7252525252525253
+    tmp = dim_reduction.umap(input_metric='euclidean', output_metric='chebyshev', neighbours=20, min_dist=0, weight=0.7)
+    test = dim_reduction.test_embedding(tmp[0], '')
 
     models = {}
 
-    supervised = Supervised(train[0], train[1], test[1])
+    supervised = Supervised(data[0], tmp[1], test)
 
-    models['rf_{0}'.format(dim)] = supervised.rforest()
-    models['ada_rf_{0}'.format(dim)] = supervised.adaRforest()
-    models['xgboost_{0}'.format(dim)] = supervised.xgboost()
-    models['knn_{0}'.format(dim)] = supervised.knn()
-    # models['nn_{0}'.format(dim)] = supervised.neural_network()
+    models['rf'] = supervised.rforest()
+    models['ada_rf'] = supervised.adaRforest()
+    models['xgboost'] = supervised.xgboost()
+    models['knn'] = supervised.knn()
+    models['nn'] = supervised.neural_network()
 
     for key, model in models.items():
         scores = supervised.evaluate_model(model, 5, 3)
 
-        print('{}: {}'.format(key, scores))
+        print('{}: {}'.format(key, statistics.mean(scores)))
     
 def tuning(filename: str):
 
@@ -249,7 +253,8 @@ def distance_matrix(file):
 if __name__ == "__main__":
 
 
-    dims = [2]
+    random.seed(1042)
+    np.random.seed(1042)
 
     parser = argparse.ArgumentParser('bcg-finder')
 
@@ -297,8 +302,20 @@ if __name__ == "__main__":
         pool = Pool()
         pool.map(antismash, os.listdir(os.path.join(os.getcwd(), 'bgc\\antismash\\antismash')))
     elif args.learn:
-        for dim in dims:
-            learn(args.learn, dim)
+
+        metrics = ['euclidean', 'chebyshev', 'manhattan', 'mahalanobis', 'minkowski', 'canberra']
+        weights = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        distances = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        neighbours = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 75, 90, 100]
+
+        comb = [distances, neighbours, weights]
+        comb = [p for p in itertools.product(*comb)]
+        metrics = [p for p in itertools.permutations(metrics, 2)]
+
+        for metric in metrics:
+            for c in comb:
+                learn(metric, c)
+
     elif args.build:
         pass
     elif args.operon:
@@ -307,6 +324,7 @@ if __name__ == "__main__":
         for dim in dims:
             tuning('umap_euclidean_euclidean_train_{0}.csv'.format(dim))
     elif args.supervised:
+   
         classify(10)
     elif args.mibig_predictions:
         for dim in dims:

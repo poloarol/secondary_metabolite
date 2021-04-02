@@ -59,6 +59,8 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 from sklearn.cluster import KMeans
 
+np.random.seed(1042)
+
 @dataclass
 class DimensionalReduction(object):
     """
@@ -139,11 +141,12 @@ class DimensionalReduction(object):
 
 
         reducer = UMAP(metric=input_metric, random_state=self.seed, n_neighbors=neighbours, min_dist=min_dist, spread=spread,
-                            n_components=components, output_metric=output_metric, target_weight=weight, force_approximation_algorithm=True)
+                            n_components=components, output_metric=output_metric, target_weight=weight, force_approximation_algorithm=True,
+                            transform_seed=self.seed, n_jobs=1)
         results = reducer.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
         data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], results)))
 
-        # self.export_results(data, 'umap_train_{0}_{1}'.format(input_metric, output_metric))
+        # self.export_results(data, 'umap_train_{}_{}_{}_{}_{}'.format(input_metric, output_metric, min_dist, neighbours, weight))
 
         return (reducer, data)
 
