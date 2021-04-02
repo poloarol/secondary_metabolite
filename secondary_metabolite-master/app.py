@@ -91,9 +91,6 @@ def learn(metric, combination):
                     f.write(s)
 
                     dim_reduction.save(umap, 'umap_{}_{}_{}_{}_{}'.format(metric[0], metric[1], combination[0], combination[1], combination[2]))
-                    
-                    train = pd.DataFrame(train, columns=['label', 'Dim1', 'Dim2', 'Dim3'])
-                    test = pd.DataFrame(test, columns=['lables', 'Dim1', 'Dim2', 'DIm3'])
 
                     train.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\train_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
                     test.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\test_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
