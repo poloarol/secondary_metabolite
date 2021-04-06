@@ -1,5 +1,6 @@
 """ app.py """
 
+from operator import index
 import os
 import gzip
 from os import path
@@ -24,8 +25,9 @@ from Bio import AlignIO
 from Bio.Phylo.TreeConstruction import DistanceCalculator
 
 from matplotlib import pyplot as plt
+from pandas.core.frame import DataFrame
 
-from sklearn.preprocessing import RobustScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import classification_report
@@ -54,15 +56,21 @@ def learn(metric, combination):
     """
 
     print('--------------------------- Processing data for UMAP begins  ----------------------------------------------')
-    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
+    seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
 
     print('--------------------------------- Processing data ends -----------------------------------------------------')
     
-    scaler = RobustScaler()
-    scaled_data = np.column_stack((data[1].iloc[:, 0], scaler.fit_transform(data[1].iloc[:, 1:])))
+    scaler = MinMaxScaler()
+    scaled_data = np.column_stack((data.iloc[:, 0], scaler.fit_transform(data.iloc[:, 1:])))
+    seed, test_data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\validation.csv'))
+    test_data = np.column_stack((test_data.iloc[:, 0], scaler.transform(test_data.iloc[:, 1:])))
+
+    if not os.path.isfile(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model')):
+        joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model'))
 
     scaled_data = pd.DataFrame(scaled_data)
-    dim_reduction = DimensionalReduction(data[0], scaled_data)
+    test_data = pd.DataFrame(test_data)
+    dim_reduction = DimensionalReduction(seed, scaled_data)
 
     print('---------------------------------- UMAP learning begins ------------------------------------------------')
     models = {}
@@ -70,10 +78,10 @@ def learn(metric, combination):
     with open(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_best_params.txt'), 'a') as f:
 
         umap, train = dim_reduction.umap(input_metric=metric[0], output_metric=metric[1], min_dist=combination[0], neighbours=combination[1], weight=combination[2])
-        test = dim_reduction.test_embedding(umap, 'umap_test_euclidean')
+        test = dim_reduction.transform(umap, test_data)
 
         try:
-            supervised = Supervised(data[0], train, test)
+            supervised = Supervised(seed, train, test)
                     
             models['rf'] = supervised.rforest()
             models['ada_rf'] = supervised.adaRforest()
@@ -82,26 +90,20 @@ def learn(metric, combination):
             models['nn'] = supervised.neural_network()
 
             for key, model in models.items():
-                scores = supervised.evaluate_model(model, 5, 3)
+                scores = supervised.evaluate_model(model, 3, 10)
 
-                # input_metric, output_metric, min_dist, neighbours, weights, model, av. accuracy
+                # print('{}: {} +/- {}'.format(key, statistics.mean(scores), statistics.stdev(scores)))
 
-                if statistics.mean(scores) >= 0.75:
+                if statistics.mean(scores) >= 0.65:
                     s = '{}, {}, {}, {}, {},  {}, {}\n'.format(metric[0], metric[1], combination[0], combination[1], combination[2], key, statistics.mean(scores))
                     f.write(s)
 
-                    dim_reduction.save(umap, 'umap_{}_{}_{}_{}_{}'.format(metric[0], metric[1], combination[0], combination[1], combination[2]))
-
-                    train.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\train_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
-                    test.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\test_{}_{}_{}_{}_{}.csv'.format(metric[0], metric[1], combination[0], combination[1], combination[2])))
         except Exception as e:
             print(e.__repr__())
 
             
 
     print('------------------------------ UMAP learning ends ------------------------------------------------')
-
-    # joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler'))
 
 def split(filename: str):
     data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\{0}'.format(filename)))
@@ -113,22 +115,29 @@ def split(filename: str):
 
 def classify(dim: int = 3):
 
-    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
-    # test = shuffle(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_test_euclidean_minkowski.csv'))
+    seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
+    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\validation.csv'))
 
-    scaler = RobustScaler()
-    scaled_data = np.column_stack((data[1].iloc[:, 0], scaler.fit_transform(data[1].iloc[:, 1:])))
+    scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model'))
 
+    scaled_data = np.column_stack((data.iloc[:, 0], scaler.transform(data.iloc[:, 1:])))
     scaled_data = pd.DataFrame(scaled_data)
-    dim_reduction = DimensionalReduction(data[0], scaled_data)
-     # input_metric, output_metric, min_dist, weight, model, av. accuracy
-     # euclidean, chebyshev, 20, 0, 0.7,  rf, 0.7252525252525253
-    tmp = dim_reduction.umap(input_metric='euclidean', output_metric='chebyshev', neighbours=20, min_dist=0, weight=0.7)
-    test = dim_reduction.test_embedding(tmp[0], '')
+
+    test_data = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
+    test_data = pd.DataFrame(test_data)
+
+    dim_reduction = DimensionalReduction(seed, scaled_data)
+    #  # input_metric, output_metric, min_dist, weight, model, av. accuracy
+    umap, train = dim_reduction.umap(output_metric='chebyshev', neighbours=15, min_dist=0, weight=0.8)
+    test = dim_reduction.transform(umap, test_data)
+
+    train.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\train.csv'), index=None)
+    test.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\test.csv'), index=None)
 
     models = {}
 
-    supervised = Supervised(data[0], tmp[1], test)
+
+    supervised = Supervised(seed, train, test)
 
     models['rf'] = supervised.rforest()
     models['ada_rf'] = supervised.adaRforest()
@@ -137,7 +146,7 @@ def classify(dim: int = 3):
     models['nn'] = supervised.neural_network()
 
     for key, model in models.items():
-        scores = supervised.evaluate_model(model, 5, 3)
+        scores = supervised.evaluate_model(model, 3, 10)
 
         print('{}: {}'.format(key, statistics.mean(scores)))
     
@@ -155,7 +164,7 @@ def shuffle(filename: str):
     data = pd.read_csv(filename, low_memory=True, header=None)
     data = clean_dataset(data)
     data = data.sample(frac=1).reset_index(drop=True)
-    return (seed, data)
+    return seed, data
 
 def clean_dataset(df):
     print('start - cleaning dataset')
@@ -318,14 +327,11 @@ if __name__ == "__main__":
     elif args.operon:
         pass
     elif args.tuning:
-        for dim in dims:
-            tuning('umap_euclidean_euclidean_train_{0}.csv'.format(dim))
+        tuning('umap_euclidean_euclidean_train_{0}.csv'.format(10))
     elif args.supervised:
-   
         classify(10)
     elif args.mibig_predictions:
-        for dim in dims:
-            mibig_predictions(dim)
+        mibig_predictions(10)
     elif args.split:
         split(args.split)
     elif args.svd:

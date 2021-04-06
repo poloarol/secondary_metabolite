@@ -1,4 +1,0 @@
-euclidean, chebyshev, 0.001, 45, 0.1,  rf, 0.7581529581529581
-euclidean, chebyshev, 0.001, 60, 0.4,  knn, 0.7528138528138528
-euclidean, chebyshev, 0.1, 75, 0.8,  rf, 0.7556998556998556
-euclidean, chebyshev, 0.1, 75, 0.8,  ada_rf, 0.7556998556998556

@@ -26,7 +26,6 @@ from scipy.stats import chi2_contingency
 from imblearn.over_sampling import SMOTE
 
 from umap import UMAP
-from umap.parametric_umap import ParametricUMAP
 
 from sklearn.decomposition import PCA
 from sklearn.ensemble import AdaBoostClassifier
@@ -72,10 +71,8 @@ class DimensionalReduction(object):
 
     def __post_init__(self):
 
-        self.train, self.test = train_test_split(self.data, test_size=0.2, shuffle=True, random_state=self.seed)
-
         smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
-        X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
 
         self.train = pd.DataFrame(np.column_stack((y, X)))
 
@@ -144,25 +141,11 @@ class DimensionalReduction(object):
                             n_components=components, output_metric=output_metric, target_weight=weight, force_approximation_algorithm=True,
                             transform_seed=self.seed, n_jobs=1)
         results = reducer.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-        data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], results)))
+        data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], results)), index=None)
 
         # self.export_results(data, 'umap_train_{}_{}_{}_{}_{}'.format(input_metric, output_metric, min_dist, neighbours, weight))
 
-        return (reducer, data)
-
-    def parametric_umap(self, components: int = 2, construction: bool = False, reconstruction: bool = False, name: str = ''):
-
-        """
-        """
-
-        embedding = ParametricUMAP(parametric_reconstruction=reconstruction, n_components=components, verbose=True, parametric_embedding=construction)
-        results = embedding.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-
-        data = np.column_stack((self.train.iloc[:, 0], results))
-
-        self.export_results(data, name)
-
-        return embedding
+        return reducer, data
 
     def export_results(self, embedding, filename: str):
         """
@@ -194,92 +177,17 @@ class DimensionalReduction(object):
 
         path =  os.path.join(os.getcwd(), 'bgc\\models\\unsupervised\\{}.model'.format(filename))
         joblib.dump(reducer, path)
-
-    def evaluate_model(self, model, df):
-
-	    # evaluate the model and collect the results
-
-        rmse = [[], []]
-
-        # shuffle datasets
-
-        transformed_test = model.inverse_transform(model.transform(self.test.iloc[:, 1:]))
-        transformed_validation = model.inverse_transform(model.transform(df.iloc[:, 1:]))
-
-        print('RMSE PKS: {}, {} '.format(mean_squared_error(self.test.iloc[:, 1:], transformed_test), mean_squared_error(df.iloc[:, 1:], transformed_validation)))
-
-
-        df_train = self.data.sample(frac=1).reset_index(drop=True)
-        df_test = df.sample(frac=1).reset_index(drop=True)
-
-        print('========================================================= Train Dataset ===========================================================')
-
-        df_train_pks = df_train.loc[df_train[0] == 0]
-        df_train_nprs = df_train.loc[df_train[0] == 1]
-        df_train_hybrid = df_train.loc[df_train[0] == 2]
-        df_train_ripp = df_train.loc[df_train[0] == 3]
-        df_train_terpene = df_train.loc[df_train[0] == 4]
-        df_train_sacc = df_train.loc[df_train[0] == 5]
-
-        pks_recoverd = model.inverse_transform(model.transform(df_train_pks.iloc[:, 1:]))
-        nrps_recovered = model.inverse_transform(model.transform(df_train_nprs.iloc[:, 1:]))
-        hybrid_recovered = model.inverse_transform(model.transform(df_train_hybrid.iloc[:, 1:]))
-        ripp_recovered = model.inverse_transform(model.transform(df_train_ripp.iloc[:, 1:]))
-        terp_recovered = model.inverse_transform(model.transform(df_train_terpene.iloc[:, 1:]))
-        sacc_recovered = model.inverse_transform(model.transform(df_train_sacc.iloc[:, 1:]))
-
-        df_pks = df_test.loc[df_test[0] == 0]
-        df_nrps = df_test.loc[df_test[0] == 1]
-        df_hybrid = df_test.loc[df_test[0] == 2]
-        df_ripp = df_test.loc[df_test[0] == 3]
-        df_terp = df_test.loc[df_test[0] == 4]
-        df_sacc = df_test.loc[df_test[0] == 5]
-
-        pks_recoverd_1 = model.inverse_transform(model.transform(df_pks.iloc[:, 1:]))
-        nrps_recovered_1 = model.inverse_transform(model.transform(df_nrps.iloc[:, 1:]))
-        hybrid_recovered_1 = model.inverse_transform(model.transform(df_hybrid.iloc[:, 1:]))
-        ripp_recovered_1 = model.inverse_transform(model.transform(df_ripp.iloc[:, 1:]))
-        terp_recovered_1 = model.inverse_transform(model.transform(df_terp.iloc[:, 1:]))
-        sacc_recovered_1 = model.inverse_transform(model.transform(df_sacc.iloc[:, 1:]))
-
-        print('RMSE PKS: {0}, {1} '.format(mean_squared_error(df_train_pks.iloc[:, 1:], pks_recoverd), mean_squared_error(df_pks.iloc[:, 1:], pks_recoverd_1)))
-        print('RMSE NRPS: {0}, {1} '.format(mean_squared_error(df_train_nprs.iloc[:, 1:], nrps_recovered), mean_squared_error(df_nrps.iloc[:, 1:], nrps_recovered_1)))
-        print('RMSE NRPS-PKS: {0}, {1} '.format(mean_squared_error(df_train_hybrid.iloc[:, 1:], hybrid_recovered), mean_squared_error(df_hybrid.iloc[:, 1:], hybrid_recovered_1)))
-        print('RMSE RiPP: {0}, {1} '.format(mean_squared_error(df_train_ripp.iloc[:, 1:], ripp_recovered), mean_squared_error(df_ripp.iloc[:, 1:], ripp_recovered_1)))
-        print('RMSE Terpene: {0}, {1} '.format(mean_squared_error(df_train_terpene.iloc[:, 1:], terp_recovered), mean_squared_error(df_terp.iloc[:, 1:], terp_recovered_1)))
-        print('RMSE Saccharide: {0}, {1} '.format(mean_squared_error(df_train_sacc.iloc[:, 1:], sacc_recovered), mean_squared_error(df_sacc.iloc[:, 1:], sacc_recovered_1)))
-
-        for i in range(30):
-
-            # sample datasets
-
-            train_sample = df_train.sample(n=50, random_state=i)
-            test_sample = df_test.sample(n=50, random_state=i)
-
-            # calculate RMSE
-
-            train_recovered = model.inverse_transform(model.transform(train_sample.iloc[:, 1:]))
-            test_recovered = model.inverse_transform(model.transform(test_sample.iloc[:, 1:]))
-
-            rmse[0].append(mean_squared_error(train_sample.iloc[:, 1:], train_recovered))
-            rmse[1].append(mean_squared_error(test_sample.iloc[:, 1:], test_recovered))
-
-        
-        embedding = model.transform(df_test.iloc[:, 1:])
-
-        embedding = pd.DataFrame(np.column_stack((df_test.iloc[:, 0], embedding)))
-        embedding.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\validation_embedding.csv'), sep=',', index=False)
-
-        tmp = pd.DataFrame(np.column_stack((rmse[0], rmse[1])), columns=['test_rmse', 'validation_rmse'])
-        tmp.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\validation_rmse.csv'), sep=',', index=False)
     
-    def test_embedding(self, model, filename):
+    def transform(self, model, data):
+        
+        try:
+            embedding = model.transform(data.iloc[:, 1:])
+            embedding = pd.DataFrame(np.column_stack((data.iloc[:, 0], embedding)), index=None)
+            # self.export_results(embedding, '{0}'.format(filename))
 
-        embedding = model.transform(self.test.iloc[:, 1:])
-        embedding = pd.DataFrame(np.column_stack((self.test.iloc[:, 0], embedding)))
-        # self.export_results(embedding, '{0}'.format(filename))
-
-        return embedding
+            return embedding
+        except Exception as e:
+            return pd.DataFrame([])
 
     
 
@@ -376,7 +284,7 @@ class Supervised(object):
 
         con_table = {'FP': FP.sum(), 'FN': FN.sum(), 'TP': TP.sum(), 'TN': TN.sum()}
 
-        return [con_table, con_matrix]
+        return con_table, con_matrix
     
     def roc_curves(self): 
         pass
