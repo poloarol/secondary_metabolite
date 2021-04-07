@@ -58,8 +58,6 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 from sklearn.cluster import KMeans
 
-np.random.seed(1042)
-
 @dataclass
 class DimensionalReduction(object):
     """
@@ -75,6 +73,7 @@ class DimensionalReduction(object):
         X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
 
         self.train = pd.DataFrame(np.column_stack((y, X)))
+
 
     def pca(self, n_components: int=50):
         """
@@ -217,26 +216,26 @@ class Supervised(object):
 
     def rforest(self):
         
-        rand_forest = OneVsRestClassifier(RandomForestClassifier(random_state=self.seed, bootstrap=True, oob_score=True), n_jobs=-1)
+        rand_forest = RandomForestClassifier(random_state=self.seed, bootstrap=True, oob_score=True)
         rand_forest.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return rand_forest
  
     def adaRforest(self, class_weight: str=None, criterion: str='gini', features: str='auto', estimators: int=100):
-        ada = AdaBoostClassifier(RandomForestClassifier(random_state=self.seed, criterion=criterion, class_weight=class_weight, max_features=features, n_estimators=estimators), algorithm='SAMME.R')
+        ada = AdaBoostClassifier(RandomForestClassifier(random_state=self.seed), algorithm='SAMME.R')
         ada.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return ada
       
     def neural_network(self, lr: str = 'constant', slv: str = 'lbfgs', activation:str = 'relu', hls=(100,)):
-        nn = MLPClassifier(random_state=self.seed, max_iter=15000, learning_rate=lr, solver=slv, activation=activation, hidden_layer_sizes=hls)
+        nn = MLPClassifier(random_state=self.seed, max_iter=4000)
         nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return nn
       
     def knn(self, algorithm: str='auto', metric: str='minkowski', neighbor: int=5, weight: str='uniform'):
 
-        k_nn = KNeighborsClassifier(algorithm=algorithm, metric=metric, n_neighbors=neighbor, weights=weight)
+        k_nn = KNeighborsClassifier()
         k_nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
         return k_nn
     
@@ -344,16 +343,19 @@ class Supervised(object):
 
         cv: int = 10
 
-        with open(os.path.join(os.getcwd(), 'bgc\\hyperparameters\\hyperparams.txt'), 'a') as f:
+        # with open(os.path.join(os.getcwd(), 'bgc\\hyperparameters\\hyperparams.txt'), 'a') as f:
 
-            f.write('=======================================================================')
+        # f.write('=======================================================================')
 
-            estimator = OneVsRestClassifier(RandomForestClassifier(random_state=self.seed, oob_score=True), n_jobs=-1)
+        estimator = OneVsRestClassifier(RandomForestClassifier(random_state=self.seed, oob_score=True), n_jobs=-1)
 
-            grid_search = GridSearchCV(estimator=estimator, param_grid=rf_grid, cv=cv, n_jobs=-1)
-            grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        grid_search = GridSearchCV(estimator=estimator, param_grid=rf_grid, cv=cv, n_jobs=-1)
+        grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
-            print('=======================================================================')
+
+        print(grid_search.best_params_, grid_search.best_score_)
+
+        print('=======================================================================')
 
 
 

@@ -27,7 +27,7 @@ from Bio.Phylo.TreeConstruction import DistanceCalculator
 from matplotlib import pyplot as plt
 from pandas.core.frame import DataFrame
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import Normalizer, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import classification_report
@@ -60,13 +60,14 @@ def learn(metric, combination):
 
     print('--------------------------------- Processing data ends -----------------------------------------------------')
     
-    scaler = MinMaxScaler()
-    scaled_data = np.column_stack((data.iloc[:, 0], scaler.fit_transform(data.iloc[:, 1:])))
+    scaler = Normalizer()
+    scaler.fit(data.iloc[:, 1:])
+    scaled_data = np.column_stack((data.iloc[:, 0], scaler.transform(data.iloc[:, 1:])))
     seed, test_data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\validation.csv'))
     test_data = np.column_stack((test_data.iloc[:, 0], scaler.transform(test_data.iloc[:, 1:])))
 
-    if not os.path.isfile(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model')):
-        joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model'))
+    if not os.path.isfile(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\Normalizer.model')):
+        joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\scaler\\Normalizer.model'))
 
     scaled_data = pd.DataFrame(scaled_data)
     test_data = pd.DataFrame(test_data)
@@ -94,7 +95,7 @@ def learn(metric, combination):
 
                 # print('{}: {} +/- {}'.format(key, statistics.mean(scores), statistics.stdev(scores)))
 
-                if statistics.mean(scores) >= 0.65:
+                if statistics.mean(scores) >= 0.7:
                     s = '{}, {}, {}, {}, {},  {}, {}\n'.format(metric[0], metric[1], combination[0], combination[1], combination[2], key, statistics.mean(scores))
                     f.write(s)
 
@@ -118,7 +119,9 @@ def classify(dim: int = 3):
     seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'))
     seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\validation.csv'))
 
-    scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model'))
+    # scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\MinMaxScaler.model'))
+    scaler = Normalizer()
+    scaler.fit(data.iloc[:, 1:])
 
     scaled_data = np.column_stack((data.iloc[:, 0], scaler.transform(data.iloc[:, 1:])))
     scaled_data = pd.DataFrame(scaled_data)
@@ -128,7 +131,7 @@ def classify(dim: int = 3):
 
     dim_reduction = DimensionalReduction(seed, scaled_data)
     #  # input_metric, output_metric, min_dist, weight, model, av. accuracy
-    umap, train = dim_reduction.umap(output_metric='chebyshev', neighbours=15, min_dist=0, weight=0.8)
+    umap, train = dim_reduction.umap()
     test = dim_reduction.transform(umap, test_data)
 
     train.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\train.csv'), index=None)
@@ -145,10 +148,12 @@ def classify(dim: int = 3):
     models['knn'] = supervised.knn()
     models['nn'] = supervised.neural_network()
 
+    # supervised.hyperparameter_tuning()
+
     for key, model in models.items():
         scores = supervised.evaluate_model(model, 3, 10)
 
-        print('{}: {}'.format(key, statistics.mean(scores)))
+        print('{}: {} +/- {}'.format(key, statistics.mean(scores), statistics.stdev(scores)))
     
 def tuning(filename: str):
 
@@ -160,7 +165,7 @@ def tuning(filename: str):
 def shuffle(filename: str):
     """ shuffle the pandas dataset and divide it into a 4 (train) : 1 (test) ratio. """
 
-    seed: int = 1042
+    seed: int = 666
     data = pd.read_csv(filename, low_memory=True, header=None)
     data = clean_dataset(data)
     data = data.sample(frac=1).reset_index(drop=True)
@@ -259,8 +264,8 @@ def distance_matrix(file):
 if __name__ == "__main__":
 
 
-    random.seed(1042)
-    np.random.seed(1042)
+    random.seed(666)
+    np.random.seed(666)
 
     parser = argparse.ArgumentParser('bcg-finder')
 
@@ -280,7 +285,6 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--distance', help='Build phylogenetic distance matrix')
 
     args = parser.parse_args()
-    np.random.seed(1042)
 
     if args.trainer:
         if args.trainer.lower().endswith('gz'):

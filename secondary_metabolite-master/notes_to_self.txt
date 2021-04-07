@@ -10,14 +10,18 @@ RiPP - 3 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
 Terpene - 4
 Bacteriocin - 5
 
-training : test : validation =  70 : 15 : 15
+training : testing =  75 : 25
 
 
 Training set: Sample data used to fit the model
 Testing set: Sample data used to provide an unbiased evaluation of the model fit, while tuning model hyperparameters.
                 The evaluation becomes more biased as skill on the model validation dataset is incorporated into the model
                 comparison.
-Validation set: Sample data used to provide an unbiased evaluation of a final model fit of the dataset
+
+PKS : 384
+NRPS : 275
+RiPP : 252
+
 
 
 
