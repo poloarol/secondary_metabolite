@@ -8,6 +8,7 @@ from typing import Any, List
 from dataclasses import dataclass
 from joblib import parallel
 from numpy.lib import column_stack
+from numpy.lib.shape_base import split
 from pyfasta.fasta import FastaNotFound
 from scipy import stats
 from scipy.optimize.zeros import results_c
@@ -42,6 +43,8 @@ from sklearn.metrics import auc
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import cohen_kappa_score
+from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_fscore_support
@@ -69,10 +72,7 @@ class DimensionalReduction(object):
 
     def __post_init__(self):
 
-        smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
-        X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
-
-        self.train = pd.DataFrame(np.column_stack((y, X)))
+        self.train = self.data
 
 
     def pca(self, n_components: int=50):
@@ -213,6 +213,11 @@ class Supervised(object):
         if test.isnull().values.any():
             test = inputer.fit_transform(test)
             self.test = pd.DataFrame(np.column_stack((self.test.iloc[:, 0], test)))
+        
+        # smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
+        # X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+
+        # self.train = pd.DataFrame(np.column_stack((y, X)))
 
     def rforest(self):
         
@@ -259,12 +264,22 @@ class Supervised(object):
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}_.model'.format(filename))
         joblib.dump(model, path)
     
-    def evaluate_model(self, model, splits, rep):
+    def evaluate_model(self, model, splits,  rep):
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
-	    # evaluate the model and collect the results
-        scores = cross_val_score(model, self.test.iloc[:, 1:], self.test.iloc[:, 0], scoring='accuracy', cv=cv, n_jobs=-1)
+        cohen = []
+        matt = []
+        bal_acc = cross_val_score(model, self.test.iloc[:, 1:], self.test.iloc[:, 0], scoring='balanced_accuracy', cv=cv, n_jobs=-1)
+
+        for test_data, test_id in cv.split(self.test.iloc[:, 1:], self.test.iloc[:, 0]):
+            data = self.test.iloc[:, 1:].to_numpy()
+            label = self.test.iloc[:, 0].to_numpy()
+            y = model.predict(data[test_data])
+            lbl = label[test_data]
+            cohen.append(cohen_kappa_score(lbl, y))
+            matt.append(matthews_corrcoef(lbl, y))
+
+        return bal_acc, cohen, matt
         
-        return scores
     
     def contigency_table(self, model):
         predicted = model.predict(self.test.iloc[:, 1:])
