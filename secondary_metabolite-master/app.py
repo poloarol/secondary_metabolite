@@ -22,9 +22,6 @@ from numpy.core.fromnumeric import mean
 import pandas as pd
 import numpy as np
 
-from Bio import AlignIO
-from Bio.Phylo.TreeConstruction import DistanceCalculator
-
 from matplotlib import pyplot as plt
 from pandas.core.frame import DataFrame
 
@@ -129,7 +126,8 @@ def classify(dim: int = 3):
     seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
     seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
 
-    scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
+    # scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
+    scaler = RobustScaler()
     scaler.fit(train.iloc[:, 1:])
 
     scaled_train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))

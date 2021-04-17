@@ -236,10 +236,10 @@ class Supervised(object):
             test = inputer.fit_transform(test)
             self.test = pd.DataFrame(np.column_stack((self.test.iloc[:, 0], test)))
         
-        smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
-        X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        # smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
+        # X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
-        self.train = pd.DataFrame(np.column_stack((y, X)))
+        # self.train = pd.DataFrame(np.column_stack((y, X)))
 
     def rforest(self) -> RandomForestClassifier:
         
