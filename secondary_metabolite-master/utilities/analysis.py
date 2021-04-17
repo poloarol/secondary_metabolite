@@ -3,35 +3,27 @@
 import os
 import random
 import re
+from statistics import mode
 
-from typing import Any, List
+from typing import Any, Dict, List, Tuple
 from dataclasses import dataclass
-from joblib import parallel
-from numpy.lib import column_stack
-from numpy.lib.shape_base import split
-from pyfasta.fasta import FastaNotFound
-from scipy import stats
-from scipy.optimize.zeros import results_c
-from scipy.sparse.construct import random
-from sklearn.utils import shuffle
 
 import joblib
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 import biovec as bv
-
-from scipy.stats import chi2
-from scipy.stats import ttest_ind
-from scipy.stats import chi2_contingency
 
 from imblearn.over_sampling import SMOTE
 
 from umap import UMAP
 
+
 from sklearn.decomposition import PCA
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
@@ -39,27 +31,25 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import NeighborhoodComponentsAnalysis
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-from sklearn.metrics import auc
-from sklearn.metrics import roc_curve
-from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import classification_report
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import roc_auc_score
+
 
 from sklearn.impute import KNNImputer
 
-from sklearn.preprocessing import label_binarize
-from sklearn.preprocessing import StandardScaler
-
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RepeatedStratifiedKFold
 
-from sklearn.cluster import KMeans
+import tensorflow as tf
+# from tensorflow.keras.layers import Embedding, Dense, LSTM
+# from tensorflow.keras.losses import BinaryCrossentropy
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.optimizers import Adam
+
+
 
 @dataclass
 class DimensionalReduction(object):
@@ -72,10 +62,13 @@ class DimensionalReduction(object):
 
     def __post_init__(self):
 
-        self.train = self.data
+        smote = SMOTE(random_state=self.seed, sampling_strategy='not minority') # under sample dataset
+        X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
+
+        self.train = pd.DataFrame(np.column_stack((y, X)))
 
 
-    def pca(self, n_components: int=50):
+    def pca(self, n_components: int=50) -> pd.DataFrame:
         """
         PCA: Principal Component Analysis.
 
@@ -92,7 +85,7 @@ class DimensionalReduction(object):
         Returns
         -------
 
-        Pandas Array of data points
+        Pandas DataFrame
         """
 
         pca = PCA(n_components=n_components, random_state=self.seed, whiten=True)
@@ -100,11 +93,16 @@ class DimensionalReduction(object):
 
         if n_components == 2:
             data = np.column_stack([np.round(self.train.iloc[:, 0], decimals=0), np.round(embedding, decimals=5)])
-        data = np.column_stack([self.train.iloc[:, 0], embedding])
+        data = pd.DataFrame(np.column_stack([self.train.iloc[:, 0], embedding]))
         self.save(pca, 'pca_{}'.format(n_components))
+
         return data
     
-    def scree_plot(self):
+    def scree_plot(self) -> np.array:
+
+        """
+            Generates np array of Principal Components and their relative importance.
+        """
 
         A = np.asmatrix(self.train.iloc[:, 1:].T) * np.asmatrix(self.train.iloc[:, 1:])
         U, S, V = np.linalg.svd(A)
@@ -113,7 +111,7 @@ class DimensionalReduction(object):
 
         return pcs
 
-    def umap(self, input_metric: str='euclidean', neighbours: int = 15, min_dist: float = 0.1, components: int = 3, output_metric: str='euclidean', name:str = '', weight:float = 0.5, spread:float = 1):
+    def umap(self, input_metric: str='euclidean', neighbours: int = 15, min_dist: float = 0.1, components: int = 3, output_metric: str='euclidean', weight:float = 0.5) -> Tuple[UMAP, pd.DataFrame]:
         """
         Runs UMAP from the umap-learn package McInness - 2018 v0.4
 
@@ -136,17 +134,15 @@ class DimensionalReduction(object):
         """
 
 
-        reducer = UMAP(metric=input_metric, random_state=self.seed, n_neighbors=neighbours, min_dist=min_dist, spread=spread,
+        reducer = UMAP(metric=input_metric, random_state=self.seed, n_neighbors=neighbours, min_dist=min_dist,
                             n_components=components, output_metric=output_metric, target_weight=weight, force_approximation_algorithm=True,
-                            transform_seed=self.seed, n_jobs=1)
-        results = reducer.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-        data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], results)), index=None)
-
-        # self.export_results(data, 'umap_train_{}_{}_{}_{}_{}'.format(input_metric, output_metric, min_dist, neighbours, weight))
+                            transform_seed=self.seed, init='random')
+        embedding = reducer.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], embedding)), index=None)
 
         return reducer, data
 
-    def export_results(self, embedding, filename: str):
+    def export_results(self, embedding, filename: str) -> None:
         """
         Write Dimensional Reduction embedding to file i.e. Fitted model
 
@@ -161,7 +157,7 @@ class DimensionalReduction(object):
         embedding = pd.DataFrame(embedding)
         embedding.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\{0}.csv'.format(filename)), sep=',', index=False)
 
-    def save(self, reducer, filename: str = None):
+    def save(self, reducer, filename: str = None) -> None:
         """
         Save estimator to file
 
@@ -177,23 +173,49 @@ class DimensionalReduction(object):
         path =  os.path.join(os.getcwd(), 'bgc\\models\\unsupervised\\{}.model'.format(filename))
         joblib.dump(reducer, path)
     
-    def transform(self, model, data):
+    def transform(self, model: Any, data: pd.DataFrame) -> pd.DataFrame:
+
+        """
+            Using a trained model, transform data into the desired properties
+
+            Parameters
+            ----------
+
+            model: Trained Dimensional Reduction algorithm
+            data (pd.DataFrame): Data to be transformed
+
+            Returns:
+            -------
+
+            Transformed pd.DataFrame of data
+
+            Raises (Exception)
+            ------------------
+
+            If data is empty
+        """
         
         try:
-            embedding = model.transform(data.iloc[:, 1:])
-            embedding = pd.DataFrame(np.column_stack((data.iloc[:, 0], embedding)), index=None)
-            # self.export_results(embedding, '{0}'.format(filename))
+            embedding = model.transform(data)
+            embedding = pd.DataFrame(embedding, index=None)
 
             return embedding
         except Exception as e:
-            return pd.DataFrame([])
-
-    
+            raise e
 
 
 @dataclass
 class Supervised(object):
     """
+        Provides methods for Supervised Learning
+
+        Parameters
+        ----------
+
+        seed: int
+        train: pd.DataFrame
+        test: pd.DataFrame
+
     """
 
     seed: int
@@ -214,43 +236,66 @@ class Supervised(object):
             test = inputer.fit_transform(test)
             self.test = pd.DataFrame(np.column_stack((self.test.iloc[:, 0], test)))
         
-        # smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
-        # X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
+        X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
-        # self.train = pd.DataFrame(np.column_stack((y, X)))
+        self.train = pd.DataFrame(np.column_stack((y, X)))
 
-    def rforest(self):
+    def rforest(self) -> RandomForestClassifier:
         
         rand_forest = RandomForestClassifier(random_state=self.seed, bootstrap=True, oob_score=True)
         rand_forest.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return rand_forest
  
-    def adaRforest(self, class_weight: str=None, criterion: str='gini', features: str='auto', estimators: int=100):
+    def adaRforest(self) -> AdaBoostClassifier:
         ada = AdaBoostClassifier(RandomForestClassifier(random_state=self.seed), algorithm='SAMME.R')
         ada.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return ada
       
-    def neural_network(self, lr: str = 'constant', slv: str = 'lbfgs', activation:str = 'relu', hls=(100,)):
-        nn = MLPClassifier(random_state=self.seed, max_iter=4000)
+    def neural_network(self, hls=(100, 100, 100)) -> MLPClassifier:
+        nn = MLPClassifier(random_state=self.seed, max_iter=4000, hidden_layer_sizes=hls)
         nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return nn
       
-    def knn(self, algorithm: str='auto', metric: str='minkowski', neighbor: int=5, weight: str='uniform'):
+    def knn(self) -> KNeighborsClassifier:
 
         k_nn = KNeighborsClassifier()
         k_nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
         return k_nn
+
     
-    def xgboost(self):
+    def xgboost(self) -> GradientBoostingClassifier:
         xg = GradientBoostingClassifier()
         xg.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return xg
+    
+    def dnn(self):
 
-    def save(self, model, filename: str = None):
+        # print(self.train.iloc[:, 1:][:5])
+
+        model = tf.keras.models.Sequential()
+        model.add(tf.keras.layers.Dense(1500, input_shape=(3, ), activation='relu', name='fc0'))
+        model.add(tf.keras.layers.Dense(750, input_shape=(3, ), activation='relu', name='fc1'))
+        model.add(tf.keras.layers.Dense(300, input_shape=(3, ), activation='relu', name='fc2'))
+        model.add(tf.keras.layers.Dropout(0.2))
+        model.add(tf.keras.layers.Dense(3, input_shape=(3, ), activation='softmax', name='fc3'))
+
+        optimizer = tf.keras.optimizers.Adam()
+        model.compile(optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+        # y = tf.keras.utils.to_categorical(self.train.iloc[:, 0], num_classes=3)
+
+        model.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0], validation_data=(self.test.iloc[:, 1:], self.test.iloc[:, 0]), verbose=2, batch_size=5, epochs=200)
+
+        model.evaluate(self.test.iloc[:, 1:], self.test.iloc[:, 0])
+
+        return model
+
+    def save(self, model, filename: str = None) -> None:
         """
         Save estimator to file
 
@@ -264,10 +309,11 @@ class Supervised(object):
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}_.model'.format(filename))
         joblib.dump(model, path)
     
-    def evaluate_model(self, model, splits,  rep):
+    def evaluate_model(self, model, splits,  rep) -> Tuple:
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
         cohen = []
         matt = []
+        acc = cross_val_score(model, self.test.iloc[:, 1:], self.test.iloc[:, 0], scoring='accuracy', cv=cv, n_jobs=-1)
         bal_acc = cross_val_score(model, self.test.iloc[:, 1:], self.test.iloc[:, 0], scoring='balanced_accuracy', cv=cv, n_jobs=-1)
 
         for test_data, test_id in cv.split(self.test.iloc[:, 1:], self.test.iloc[:, 0]):
@@ -278,18 +324,14 @@ class Supervised(object):
             cohen.append(cohen_kappa_score(lbl, y))
             matt.append(matthews_corrcoef(lbl, y))
 
-        return bal_acc, cohen, matt
-        
-    
-    def contigency_table(self, model):
+        return acc, bal_acc, cohen, matt
+   
+    def contigency_table(self, model) -> Tuple:
         predicted = model.predict(self.test.iloc[:, 1:])
 
         # tmp = model.predict_proba(self.test.iloc[:, 1:])
-        # print(tmp)
-        # a = model.decision_function(self.test.iloc[:, 1:])
-        # print(a)
 
-        con_matrix = confusion_matrix(self.test.iloc[:, 0], predicted, labels=[0, 1, 2, 3, 4, 5])
+        con_matrix = confusion_matrix(self.test.iloc[:, 0], predicted, labels=[0, 1, 4])
 
         FP = con_matrix.sum(axis=0) - np.diag(con_matrix)
         FN = con_matrix.sum(axis=1) - np.diag(con_matrix)
@@ -302,44 +344,25 @@ class Supervised(object):
     
     def roc_curves(self): 
         pass
- 
-    def mcnemar(self, contigency_table):
-        
-        stat, p, dof, expected = chi2_contingency(contigency_table)
-        prob = 0.95
 
-        critical = chi2.ppf(prob, dof)
-        
-        if abs(stat) >= critical:
-	        print('Dependent (reject H0)')
-        else:
-	        print('Independent (fail to reject H0)')
-        # interpret p-value
-        alpha = 1.0 - prob
-        print('significance=%.3f, p=%.3f' % (alpha, p))
-        if p <= alpha:
-            print('Dependent (reject H0)')
-        else:
-            print('Independent (fail to reject H0)')
-
-    def save(self, name: str, classifier):
+    def save(self, name: str, classifier) -> None:
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(name))
         joblib.dump(classifier, path)
 
-    def hyperparameter_tuning(self):
+    def hyperparameter_tuning(self) -> None:
 
-        scaler = StandardScaler()
-        self.train.iloc[:, 1:] = scaler.fit_transform(self.train.iloc[:, 1:])
+        # scaler = StandardScaler()
+        # self.train.iloc[:, 1:] = scaler.fit_transform(self.train.iloc[:, 1:])
 
         rf_grid = {
-            'estimator__bootstrap': [True, False],
-            'estimator__n_estimators': [4500, 8500, 10000, 15000, 20000],
-            'estimator__max_features': ['log2', 'auto', 'sqrt', None],
-            'estimator__criterion': ['gini', 'entropy'],
-            'estimator__class_weight': [None, 'balanced', 'balanced_subsample'],
-            'estimator__max_depth': np.linspace(1, 1024, 128, endpoint=True),
-            'estimator__min_samples_split': np.linspace(0.1, 1.0, 10, endpoint=True),
-            'estimator__min_samples_leaf': np.linspace(0.1, 0.5, 5, endpoint=True)
+            'bootstrap': [True, False],
+            'n_estimators': [2, 10, 100, 1000],
+            'max_features': ['log2', 'auto', 'sqrt', None],
+            'criterion': ['gini', 'entropy'],
+            'class_weight': [None, 'balanced', 'balanced_subsample']
+            # 'max_depth': np.linspace(1, 1024, 128, endpoint=True),
+            # 'min_samples_split': np.linspace(0.1, 1.0, 10, endpoint=True),
+            # 'min_samples_leaf': np.linspace(0.1, 0.5, 5, endpoint=True)
         }
 
         knn_grid = {
@@ -353,7 +376,7 @@ class Supervised(object):
             'activation': ['relu', 'tanh', 'logistic', 'identity'],
             'solver': ['adam', 'sgd', 'lbfgs'],
             'learning_rate': ['constant', 'adaptive', 'invscaling'],
-            'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,)]
+            'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (100, 100, 100), (150, 150, 150)]
         }
 
         cv: int = 10
@@ -362,9 +385,9 @@ class Supervised(object):
 
         # f.write('=======================================================================')
 
-        estimator = OneVsRestClassifier(RandomForestClassifier(random_state=self.seed, oob_score=True), n_jobs=-1)
+        estimator = MLPClassifier(random_state=self.seed, max_iter=4000)
 
-        grid_search = GridSearchCV(estimator=estimator, param_grid=rf_grid, cv=cv, n_jobs=-1)
+        grid_search = GridSearchCV(estimator=estimator, param_grid=nn_grid, cv=cv, n_jobs=-1)
         grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
 
@@ -402,6 +425,7 @@ class NLP(object):
 
 
 """
+
     @article{asgari2015continuous,
     title={Continuous Distributed Representation of Biological Sequences for Deep Proteomics and Genomics},
     author={Asgari, Ehsaneddin and Mofrad, Mohammad RK},
@@ -427,48 +451,4 @@ class NLP(object):
         year = 2018,
         month = feb,
     }
-
-    @article {NBC2020,
-        author = {Narayan, Ashwin and Berger, Bonnie and Cho, Hyunghoon},
-        title = {Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell Transcriptomic Variability},
-        journal = {bioRxiv},
-        year = {2020},
-        doi = {10.1101/2020.05.12.077776},
-        publisher = {Cold Spring Harbor Laboratory},
-        URL = {https://www.biorxiv.org/content/early/2020/05/14/2020.05.12.077776},
-        eprint = {https://www.biorxiv.org/content/early/2020/05/14/2020.05.12.077776.full.pdf},
-    }
-
-    @article {NBC2020,
-        author = {Sainburg, Tim and McInnes, Leland and Gentner, Timothy Q.},
-        title = {Parametric UMAP: learning embeddings with deep neural networks for representation and semi-supervised learning},
-        journal = {ArXiv e-prints},
-        archivePrefix = "arXiv",
-        eprint = {},
-        primaryClass = "stat.ML",
-        keywords = {Statistics - Machine Learning,
-                    Computer Science - Computational Geometry,
-                    Computer Science - Learning},
-        year = 2020,
-    }
-
-    @article {mcinnes2017hdbscan,
-        title = {hdbscan: Hierarchical density based clustering},
-        author = {McInnes, Leland and Healy, John and Astels, Steve},
-        journal = {The Journal of Open Source Software},
-        volume = {2},
-        number = {11},
-        pages = {205},
-        year = {2017}
-    }
-
-    @misc{riese2019susicode,
-    author = {Riese, Felix~M.},
-    title = {{SuSi: Supervised Self-Organizing Maps in Python}},
-    year = {2019},
-    DOI = {10.5281/zenodo.2609130},
-    publisher = {Zenodo},
-    howpublished = {\href{https://doi.org/10.5281/zenodo.2609130}{doi.org/10.5281/zenodo.2609130}}
-}
-
 """

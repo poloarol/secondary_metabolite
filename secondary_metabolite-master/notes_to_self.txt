@@ -6,25 +6,19 @@
 PKS + Aryl Polyenes - 0
 NRPS + Siderophores - 1
 NRPS - PKS - 2
-RiPP - 3 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
+// RiPP - 2 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
 Terpene - 4
 Bacteriocin - 5
 
-training : testing =  75 : 25
+UMAP
+
+Training : Testing = 60 : 40
 
 
 Training set: Sample data used to fit the model
 Testing set: Sample data used to provide an unbiased evaluation of the model fit, while tuning model hyperparameters.
                 The evaluation becomes more biased as skill on the model validation dataset is incorporated into the model
                 comparison.
-
-PKS : 384
-NRPS : 275
-RiPP : 252
-
-
-
-
 
 
 Do a RiPPsFinder || RiPP-ML
