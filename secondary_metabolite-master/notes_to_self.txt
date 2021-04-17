@@ -6,7 +6,7 @@
 PKS + Aryl Polyenes - 0
 NRPS + Siderophores - 1
 NRPS - PKS - 2
-// RiPP - 2 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
+// RiPP - 3 : Lanthipeptide, Lassopeptide, Thiopeptide, Sactipeptide, Cyanobactin
 Terpene - 4
 Bacteriocin - 5
 

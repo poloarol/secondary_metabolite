@@ -341,9 +341,6 @@ class Supervised(object):
         con_table = {'FP': FP.sum(), 'FN': FN.sum(), 'TP': TP.sum(), 'TN': TN.sum()}
 
         return con_table, con_matrix
-    
-    def roc_curves(self): 
-        pass
 
     def save(self, name: str, classifier) -> None:
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(name))

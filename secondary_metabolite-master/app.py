@@ -83,14 +83,14 @@ def learn(metric, combination):
                     
             models['rf'] = supervised.rforest()
             models['ada_rf'] = supervised.adaRforest()
-            models['xgboost'] = supervised.xgboost()
+            # models['xgboost'] = supervised.xgboost()
             models['knn'] = supervised.knn()
             models['nn'] = supervised.neural_network()
 
             for key, model in models.items():
                 acc, bal_acc, cohen, matt = supervised.evaluate_model(model, 3, 5)
 
-                if statistics.mean(bal_acc) >= 0.7 and statistics.mean(cohen) >= 0.45 and statistics.mean(matt) >= 0.45:
+                if statistics.mean(bal_acc) >= 0.7 and statistics.mean(cohen) >= 0.65 and statistics.mean(matt) >= 0.65:
                     print('UMAP; Input: {}, Output: {}, Min. Dist: {}, Neighbours: {}, weight: {}'.format(metric[0], metric[1], combination[0], combination[1], combination[2]))
                     print('{}'.format(key))
                     print('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
@@ -151,7 +151,7 @@ def classify(dim: int = 3):
 
     models['rf'] = supervised.rforest()
     models['ada_rf'] = supervised.adaRforest()
-    models['xgboost'] = supervised.xgboost()
+    # models['xgboost'] = supervised.xgboost()
     models['knn'] = supervised.knn()
     models['nn'] = supervised.neural_network()
 
