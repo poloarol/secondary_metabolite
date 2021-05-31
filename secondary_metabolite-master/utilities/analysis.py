@@ -1,41 +1,31 @@
 """ analysis.py -- provides an interface to use several machine learning algorithms """
 
-import os
-import random
-import re
-from statistics import mode
 
+import os
 from typing import Any, Dict, List, Tuple
 from dataclasses import dataclass
 
+
+
+import pycm
 import joblib
 import numpy as np
 import pandas as pd
-from pandas.core.frame import DataFrame
 import biovec as bv
+import tensorflow as tf
 
 from imblearn.over_sampling import SMOTE
 
 from umap import UMAP
 
-
-from sklearn.decomposition import PCA
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.svm import SVC
-from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 
-from sklearn.neighbors import NeighborhoodComponentsAnalysis
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import roc_auc_score
-
 
 from sklearn.impute import KNNImputer
 
@@ -43,18 +33,18 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RepeatedStratifiedKFold
 
-import tensorflow as tf
-# from tensorflow.keras.layers import Embedding, Dense, LSTM
-# from tensorflow.keras.losses import BinaryCrossentropy
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.optimizers import Adam
 
 
 
 @dataclass
-class DimensionalReduction(object):
+class DimensionalReduction():
+
     """
-        Provides methods to run Dimensional Reduction
+
+    Dimensional Reduction provides functions to perform dimensional reduction using umap-learn package.
+        https://pair-code.github.io/understanding-umap/
+        https://umap-learn.readthedocs.io/en/latest/index.html
+    
     """
 
     seed: int
@@ -66,142 +56,85 @@ class DimensionalReduction(object):
         X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
 
         self.train = pd.DataFrame(np.column_stack((y, X)))
+    
+    def learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1) -> UMAP:
 
-
-    def pca(self, n_components: int=50) -> pd.DataFrame:
         """
-        PCA: Principal Component Analysis.
-
-        Allows to run PCA - deterministic dimensional reduction algorithm, to convert high dimensional
-        dataset to a lower dimensional dataset
-
-        The resulting data points, maximize variance within the dataset
+        Learns a UMAP dimensional reduction function.
 
         Parameters
         ----------
+            in_metric (str) - Input metric as described by UMAP documentation
+            out_meric (str) - Output metric as described by UMAP documentation
+            components (int) - Number of components to reduce dataset to
+            neighbours (int) - size of local neighbourhood
+            distance (float) - effective minimum distance between points
 
-        n_components: int = 50 (default)
-
+            For more details, visit the UMAP documentation.
+                https://umap-learn.readthedocs.io/en/latest/api.html
+        
         Returns
         -------
-
-        Pandas DataFrame
+            UMAP model
         """
 
-        pca = PCA(n_components=n_components, random_state=self.seed, whiten=True)
-        embedding = pca.fit_transform(self.train.iloc[:, 1:])
-
-        if n_components == 2:
-            data = np.column_stack([np.round(self.train.iloc[:, 0], decimals=0), np.round(embedding, decimals=5)])
-        data = pd.DataFrame(np.column_stack([self.train.iloc[:, 0], embedding]))
-        self.save(pca, 'pca_{}'.format(n_components))
-
-        return data
-    
-    def scree_plot(self) -> np.array:
-
-        """
-            Generates np array of Principal Components and their relative importance.
-        """
-
-        A = np.asmatrix(self.train.iloc[:, 1:].T) * np.asmatrix(self.train.iloc[:, 1:])
-        U, S, V = np.linalg.svd(A)
-
-        pcs = S**2/np.sum(S**2)
-
-        return pcs
-
-    def umap(self, input_metric: str='euclidean', neighbours: int = 15, min_dist: float = 0.1, components: int = 3, output_metric: str='euclidean', weight:float = 0.5) -> Tuple[UMAP, pd.DataFrame]:
-        """
-        Runs UMAP from the umap-learn package McInness - 2018 v0.4
-
-        Parameters 
-        ----------
-        input_metric: str = 'euclidean
-        neighbours: int = 15
-        min_dist: float = 0.1
-        components: int = 2
-        output_metric: str = 'euclidean'
-
-        For description of package parameters & understanding of UMAP visit: 
-        1. https://github.com/lmcinnes/umap/tree/0.5dev
-        2. https://pair-code.github.io/understanding-umap/
-
-        Return
-        -------
-        reducer (estimator)
-
-        """
-
-
-        reducer = UMAP(metric=input_metric, random_state=self.seed, n_neighbors=neighbours, min_dist=min_dist,
-                            n_components=components, output_metric=output_metric, target_weight=weight, force_approximation_algorithm=True,
-                            transform_seed=self.seed, init='random')
-        embedding = reducer.fit_transform(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-        data = pd.DataFrame(np.column_stack((self.train.iloc[:, 0], embedding)), index=None)
-
-        return reducer, data
-
-    def export_results(self, embedding, filename: str) -> None:
-        """
-        Write Dimensional Reduction embedding to file i.e. Fitted model
-
-        Parameters
-        ----------
-        embedding: LDA, NCA and UMAP embedding
-        algorithm (str): specification of algorithm
-        filename (str): optional filename
-
-        """
-
-        embedding = pd.DataFrame(embedding)
-        embedding.to_csv(os.path.join(os.getcwd(), 'bgc\\embedding\\{0}.csv'.format(filename)), sep=',', index=False)
-
-    def save(self, reducer, filename: str = None) -> None:
-        """
-        Save estimator to file
-
-        Parameters
-        ----------
-        reducer: Dimensional Reduction Estimator
-        in_metric (str): Metric used to embbed the vectorial space
-        oput_metric (str): Projection metric
-
-
-        """
-
-        path =  os.path.join(os.getcwd(), 'bgc\\models\\unsupervised\\{}.model'.format(filename))
-        joblib.dump(reducer, path)
-    
-    def transform(self, model: Any, data: pd.DataFrame) -> pd.DataFrame:
-
-        """
-            Using a trained model, transform data into the desired properties
-
-            Parameters
-            ----------
-
-            model: Trained Dimensional Reduction algorithm
-            data (pd.DataFrame): Data to be transformed
-
-            Returns:
-            -------
-
-            Transformed pd.DataFrame of data
-
-            Raises (Exception)
-            ------------------
-
-            If data is empty
-        """
+        reducer = UMAP(random_state=self.seed, init='random', 
+                        metric=in_metric, output_metric=out_metric, n_components=components,
+                        n_neighbors=neighbours, min_dist=distance)
         
-        try:
-            embedding = model.transform(data)
-            embedding = pd.DataFrame(embedding, index=None)
+        reducer.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
-            return embedding
+        return reducer
+    
+    def combine_union(self, model_1:UMAP, model_2:UMAP) -> UMAP:
+
+        """
+        Combine two UMAP models through their union.
+
+        NB: The models should already be trained
+
+        Paramters
+        ---------
+            model_1 (UMAP) - trained umap model
+            model_2 (UMAP) - trained umap model
+        
+        Return
+        ------
+            union_model (UMAP) - Union model of both model_1 and model_2
+        """
+
+        try:
+            
+            union_model = model_1 + model_2
+            return union_model
+        
         except Exception as e:
-            raise e
+            raise e('One model is not trained')
+    
+    def combine_intersection(self, model_1:UMAP, model_2:UMAP) -> UMAP:
+        
+        """
+        Combine two UMAP models through their intersection.
+
+        NB: The models should already be trained
+
+        Paramters
+        ---------
+            model_1 (UMAP) - trained umap model
+            model_2 (UMAP) - trained umap model
+        
+        Return
+        ------
+            intersection_model (UMAP) - Intersection model of both model_1 and model_2
+        """
+
+        try:
+            
+            intersection_model = model_1 * model_2
+            return intersection_model
+        
+        except Exception as e:
+            raise e('One model is not trained')
 
 
 @dataclass
@@ -236,10 +169,10 @@ class Supervised(object):
             test = inputer.fit_transform(test)
             self.test = pd.DataFrame(np.column_stack((self.test.iloc[:, 0], test)))
         
-        # smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
-        # X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        smote = SMOTE(random_state=self.seed, sampling_strategy='not majority')
+        X, y = smote.fit_resample(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
-        # self.train = pd.DataFrame(np.column_stack((y, X)))
+        self.train = pd.DataFrame(np.column_stack((y, X)))
 
     def rforest(self) -> RandomForestClassifier:
         
@@ -254,18 +187,18 @@ class Supervised(object):
 
         return ada
       
-    def neural_network(self, hls=(100, 100, 100)) -> MLPClassifier:
-        nn = MLPClassifier(random_state=self.seed, max_iter=4000, hidden_layer_sizes=hls)
+    def neural_network(self, hls=(100, 100, 100), activation: str = 'relu', solver: str = 'adam', learning_rate: str = 'constant', max_iter=2000) -> MLPClassifier:
+        
+        nn = MLPClassifier(random_state=self.seed, max_iter=max_iter, hidden_layer_sizes=hls, activation=activation, solver=solver, learning_rate=learning_rate)
         nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
         return nn
       
-    def knn(self) -> KNeighborsClassifier:
+    def knn(self, neighbours: int = 2, weights: str = 'uniform', metric: str = 'euclidean', algo: str = 'auto') -> KNeighborsClassifier:
 
-        k_nn = KNeighborsClassifier()
+        k_nn = KNeighborsClassifier(n_neighbors=neighbours, weights=weights, metric=metric, algorithm=algo)
         k_nn.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
         return k_nn
-
     
     def xgboost(self) -> GradientBoostingClassifier:
         xg = GradientBoostingClassifier()
@@ -273,25 +206,28 @@ class Supervised(object):
 
         return xg
     
-    def dnn(self):
+    def dnn(self) -> tf.keras.models.Sequential:
 
         # print(self.train.iloc[:, 1:][:5])
 
         model = tf.keras.models.Sequential()
-        model.add(tf.keras.layers.Dense(1500, input_shape=(3, ), activation='relu', name='fc0'))
-        model.add(tf.keras.layers.Dense(750, input_shape=(3, ), activation='relu', name='fc1'))
-        model.add(tf.keras.layers.Dense(300, input_shape=(3, ), activation='relu', name='fc2'))
-        model.add(tf.keras.layers.Dropout(0.2))
-        model.add(tf.keras.layers.Dense(3, input_shape=(3, ), activation='softmax', name='fc3'))
+        model.add(tf.keras.layers.Dense(3000, input_shape=(3, ), activation='relu', name='fc0'))
+        model.add(tf.keras.layers.Dense(2000, input_shape=(3, ), activation='relu', name='fc1'))
+        model.add(tf.keras.layers.Dense(1500, input_shape=(3, ), activation='relu', name='fc2'))
+        model.add(tf.keras.layers.Dense(750, input_shape=(3, ), activation='relu', name='fc3'))
+        model.add(tf.keras.layers.Dense(350, input_shape=(3, ), activation='relu', name='fc4'))
+        model.add(tf.keras.layers.Dropout(0.5))
+        model.add(tf.keras.layers.Dense(5, input_shape=(3, ), activation='softmax', name='fc5'))
 
-        optimizer = tf.keras.optimizers.Adam()
-        model.compile(optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-6)
+        model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
-        # y = tf.keras.utils.to_categorical(self.train.iloc[:, 0], num_classes=3)
+        y = tf.keras.utils.to_categorical(self.train.iloc[:, 0]) # train
+        yy = tf.keras.utils.to_categorical(self.test.iloc[:, 0]) # test
 
-        model.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0], validation_data=(self.test.iloc[:, 1:], self.test.iloc[:, 0]), verbose=2, batch_size=5, epochs=200)
+        model.fit(self.train.iloc[:, 1:], y, validation_data=(self.test.iloc[:, 1:], yy), verbose=2, batch_size=10, epochs=200)
 
-        model.evaluate(self.test.iloc[:, 1:], self.test.iloc[:, 0])
+        model.evaluate(self.test.iloc[:, 1:], yy)
 
         return model
 
@@ -309,7 +245,7 @@ class Supervised(object):
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}_.model'.format(filename))
         joblib.dump(model, path)
     
-    def evaluate_model(self, model, splits,  rep) -> Tuple:
+    def evaluate_model(self, model: Any, splits: int,  rep: int) -> Tuple[List, List, List, List]:
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
         cohen = []
         matt = []
@@ -326,21 +262,12 @@ class Supervised(object):
 
         return acc, bal_acc, cohen, matt
    
-    def contigency_table(self, model) -> Tuple:
+    def contigency_table(self, model) -> Tuple[Dict, List]:
         predicted = model.predict(self.test.iloc[:, 1:])
 
-        # tmp = model.predict_proba(self.test.iloc[:, 1:])
+        cm  = pycm.ConfusionMatrix(actual_vector=np.array(self.test.iloc[:, 0]), predict_vector=predicted)
 
-        con_matrix = confusion_matrix(self.test.iloc[:, 0], predicted, labels=[0, 1, 4])
-
-        FP = con_matrix.sum(axis=0) - np.diag(con_matrix)
-        FN = con_matrix.sum(axis=1) - np.diag(con_matrix)
-        TP = np.diag(con_matrix)
-        TN = con_matrix.sum() - (FP + FN + TP)
-
-        con_table = {'FP': FP.sum(), 'FN': FN.sum(), 'TP': TP.sum(), 'TN': TN.sum()}
-
-        return con_table, con_matrix
+        return cm
 
     def save(self, name: str, classifier) -> None:
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(name))
@@ -373,7 +300,8 @@ class Supervised(object):
             'activation': ['relu', 'tanh', 'logistic', 'identity'],
             'solver': ['adam', 'sgd', 'lbfgs'],
             'learning_rate': ['constant', 'adaptive', 'invscaling'],
-            'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (100, 100, 100), (150, 150, 150)]
+            'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (100, 100, 100), (150, 150, 150)],
+            'max_iter': [2000, 4000, 6000, 8000]
         }
 
         cv: int = 10
@@ -382,7 +310,7 @@ class Supervised(object):
 
         # f.write('=======================================================================')
 
-        estimator = MLPClassifier(random_state=self.seed, max_iter=4000)
+        estimator = MLPClassifier(random_state=self.seed)
 
         grid_search = GridSearchCV(estimator=estimator, param_grid=nn_grid, cv=cv, n_jobs=-1)
         grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
@@ -392,6 +320,33 @@ class Supervised(object):
 
         print('=======================================================================')
 
+        
+        estimator = KNeighborsClassifier()
+
+        grid_search = GridSearchCV(estimator=estimator, param_grid=knn_grid, cv=cv, n_jobs=-1)
+        grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+
+
+        print(grid_search.best_params_, grid_search.best_score_)
+
+    def evaluate_keras(self, model: Any, splits: int, rep: int) -> Tuple[List, List, List]:
+        cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
+        cohen = []
+        matt = []
+        bal_acc = []
+
+        for test_data, test_id in cv.split(self.test.iloc[:, 1:], self.test.iloc[:, 0]):
+            data = self.test.iloc[:, 1:].to_numpy()
+            label = self.test.iloc[:, 0].to_numpy()
+            y = np.argmax(model.predict(data[test_data]), axis=1)
+            class_names = ['PKS', 'NRPS', 'Terpene']
+            print(class_names[y])
+            # lbl = label[test_data]
+            # bal_acc.append(balanced_accuracy_score(lbl, y))
+            # cohen.append(cohen_kappa_score(lbl, y))
+            # matt.append(matthews_corrcoef(lbl, y))
+        
+        return bal_acc, cohen, matt
 
 
 @dataclass
@@ -403,7 +358,7 @@ class NLP(object):
     def __post_init__(self):
         try:
             self.model = bv.models.ProtVec(self.filename, corpus_fname="out_corpus.txt", n=3)
-        except (FileNotFoundError, FastaNotFound) as e:
+        except FileNotFoundError as e:
             print(e.__repr__())
         
         np.random.seed(1042)

@@ -1,12 +1,8 @@
 """ app.py """
 
-from operator import index
 import os
 import gzip
-from os import path, stat_result, write
-import queue
 import time
-from typing import List
 import joblib
 import shutil
 import random
@@ -14,21 +10,13 @@ import argparse
 import itertools
 import statistics
 
+from typing import List
 from multiprocessing import Pool
 
-import biovec as bv
-from numpy import ma
-from numpy.core.fromnumeric import mean
 import pandas as pd
 import numpy as np
 
-from matplotlib import pyplot as plt
-from pandas.core.frame import DataFrame
-
-from sklearn.preprocessing import RobustScaler, Normalizer
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.metrics import classification_report
+from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
 
 from utilities.download import Scraper
@@ -38,107 +26,111 @@ from utilities.analysis import Supervised
 from utilities.analysis import DimensionalReduction
 
 
-def svd(filename: str):
-    data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\{0}'.format(filename)))
-
-    unsupervised = DimensionalReduction(data[0], data[1])
-
-    pcs = unsupervised.scree_plot()
-    num_vars = np.arange(data[1].iloc[:, 1:].shape[1]) + 1
-    pcs = np.column_stack((num_vars, pcs))
-
-    np.savetxt('bgc\\embedding\\pcs.csv', pcs, delimiter=',')
-
-def learn(metric, combination):
+def learn(metric):
     """
+
+        Optimize UMAP by varying the metrics and neighbours. 
+        The UMAP optimization is tested using supervised learning.
+        The optmization results are written to a file, with each containing
+            accuracy, balanced accuracy, Cohen's Kappa and Matt. Corr. Coef
+
+        Parameters
+        ----------
+        metric (tuple[str, str]) e.g. (euclidean, euclidean)
     """
-    scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
-    
+
     seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    scaled_train = np.column_stack((train.iloc[:, 0].astype(int), scaler.transform(train.iloc[:, 1:])))
+    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'))
 
-    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
-    scaled_test = np.column_stack((test.iloc[:, 0].astype(int), scaler.transform(test.iloc[:, 1:])))
-    
-    scaled_train = pd.DataFrame(scaled_train)
-    scaled_test = pd.DataFrame(scaled_test)
+    scaler = RobustScaler().fit(train.iloc[:, 1:])
 
-    dim_reduction = DimensionalReduction(seed, scaled_train)
+    train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
+    test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
 
-    print('---------------------------------- UMAP learning begins ------------------------------------------------')
+    train = pd.DataFrame(train)
+    test = pd.DataFrame(test)
+
+    dim_reduction = DimensionalReduction(seed, train)
+
+    neighbours: List = [5, 15, 30, 45, 60, 75, 90]
+
+    for neighbour in neighbours:
+
+        print('UMAP-learn has begun - num. of neighbours: {}'.format(neighbour))
+
+        umap = dim_reduction.learn(in_metric=metric[0], out_metric=metric[1], neighbours=neighbour)
+
+        transformed_train = np.column_stack((train.iloc[:, 0], umap.transform(train.iloc[:, 1:])))
+        transformed_test = np.column_stack((test.iloc[:, 0], umap.transform(test.iloc[:, 1:])))
+
+        transformed_train = pd.DataFrame(transformed_train)
+        transformed_test = pd.DataFrame(transformed_test)
+
+        print('Evaluating UMAP model')
+
+        evaluate_umap_model(seed, transformed_train, transformed_test)
+
+        print('UMAP evaluation ended')
+
+        print('UMAP-learn has ended - num. of neighbours: {}'.format(neighbour))
+
+    # evaluate umap models using supervised learning
+
+
+def evaluate_umap_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> None:
+
+    supervised = Supervised(seed, train, test)
+
     models = {}
 
-    with open(os.path.join(os.getcwd(), 'bgc\\embedding\\umap_best_{}_{}.txt'.format(metric[0], metric[1])), 'a') as f:
+    models['rf'] = supervised.rforest()
+    models['ada_rf'] = supervised.adaRforest()
+    models['nn'] = supervised.neural_network()
+    models['knn'] = supervised.knn()
+    models['xg'] = supervised.xgboost()
 
-        umap, train = dim_reduction.umap(input_metric=metric[0], output_metric=metric[1], min_dist=combination[0], neighbours=combination[1], weight=combination[2])
-        test_transformed = dim_reduction.transform(umap, scaled_test.iloc[:, 1:])
+    for key, model in models.items():
+        accuracy, bal_accuracy, cohen_kappa, matt_corr_coef = supervised.evaluate_model(model, 3, 5)
+        cm = supervised.contigency_table(model)
 
-        test = pd.DataFrame(np.column_stack((test.iloc[:, 0], test_transformed)))
+        print('Classifier: {}'.format(key))
+        print('Accuracy: {} +/- {}'.format(statistics.mean(accuracy), statistics.stdev(accuracy)))
+        print('Bal. Accuracy: {} +/- {}'.format(statistics.mean(bal_accuracy), statistics.stdev(bal_accuracy)))
+        print("Cohen's Kappa: {} +/- {}".format(statistics.mean(cohen_kappa), statistics.stdev(cohen_kappa)))
+        print("Matthew's Corr. Coef: {} +/- {}".format(statistics.mean(matt_corr_coef), statistics.stdev(matt_corr_coef)))
 
-        try:
-            supervised = Supervised(seed, train, test)
-                    
-            models['rf'] = supervised.rforest()
-            models['ada_rf'] = supervised.adaRforest()
-            # models['xgboost'] = supervised.xgboost()
-            models['knn'] = supervised.knn()
-            models['nn'] = supervised.neural_network()
+        cm.relabel(mapping={0: 'PKS', 1: 'NRPS', 3: 'Terpene', 4: 'Bacteriocin'})
 
-            for key, model in models.items():
-                acc, bal_acc, cohen, matt = supervised.evaluate_model(model, 3, 5)
-
-                if statistics.mean(bal_acc) >= 0.7 and statistics.mean(cohen) >= 0.65 and statistics.mean(matt) >= 0.65:
-                    print('UMAP; Input: {}, Output: {}, Min. Dist: {}, Neighbours: {}, weight: {}'.format(metric[0], metric[1], combination[0], combination[1], combination[2]))
-                    print('{}'.format(key))
-                    print('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
-                    print('Bal. Accuracy: {} +/- {}'.format(round(statistics.mean(bal_acc), 3) , round(statistics.stdev(bal_acc), 3)))
-                    print("Cohen's Kappa: {} +/- {}".format(round(statistics.mean(cohen), 3) , round(statistics.stdev(cohen), 3)))
-                    print('Matt. Corr. Coef: {} +/- {}'.format(round(statistics.mean(matt), 3) ,round(statistics.stdev(matt), 3)))
-
-                    a, b = supervised.contigency_table(model)
-
-                    print(a)
-                    print(b)
-
-                    f.write('Model: {}'.format(key))
-                    f.write('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
-                    f.write('Bal. Accuracy: {} +/- {}'.format(round(statistics.mean(bal_acc), 3) , round(statistics.stdev(bal_acc), 3)))
-                    f.write("Cohen's Kappa: {} +/- {}".format(round(statistics.mean(cohen), 3) , round(statistics.stdev(cohen), 3)))
-                    f.write('Matt. Corr. Coef: {} +/- {}'.format(round(statistics.mean(matt), 3) ,round(statistics.stdev(matt), 3)))
-
-        except Exception as e:
-            print(e.__repr__())
-
-            
-
-    print('------------------------------ UMAP learning ends ------------------------------------------------')
+        cm.print_matrix()
 
 def split(filename: str):
+
+    """Split dataset into training and testing set """
     seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\{0}'.format(filename)))
     tmp = data.sample(frac=1).reset_index(drop=True)
     train, test = train_test_split(tmp, test_size=0.4, random_state=seed)
 
     np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'), train, comments='', delimiter=',')
-    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'), test, comments='', delimiter=',')
+    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'), test, comments='', delimiter=',')
 
 def classify(dim: int = 3):
 
-    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
+    seed, nan = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
+    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\4_class_mb.csv'))
 
     # scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
     scaler = RobustScaler()
-    scaler.fit(train.iloc[:, 1:])
+    scaler.fit(nan.iloc[:, 1:])
 
     scaled_train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
     scaled_train = pd.DataFrame(scaled_train)
-
     scaled_test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
     scaled_test = pd.DataFrame(scaled_test)
 
-    dim_reduction = DimensionalReduction(seed, scaled_test)
-    umap, train = dim_reduction.umap(input_metric='chebyshev', output_metric='manhattan')
-    joblib.dump(umap, os.path.join(os.getcwd(), 'bgc\\models\\dimreduction\\umap.model'))
+    dim_reduction = DimensionalReduction(seed, scaled_train)
+
+    umap, train = dim_reduction.umap(neighbours=75, input_metric='chebyshev', output_metric='chebyshev')
     test_transformed = dim_reduction.transform(umap, scaled_test.iloc[:, 1:])
 
     test = pd.DataFrame(np.column_stack((test.iloc[:, 0], test_transformed)))
@@ -149,32 +141,43 @@ def classify(dim: int = 3):
 
     models['rf'] = supervised.rforest()
     models['ada_rf'] = supervised.adaRforest()
-    # models['xgboost'] = supervised.xgboost()
     models['knn'] = supervised.knn()
     models['nn'] = supervised.neural_network()
 
     for key, model in models.items():
-        acc, bal_acc, cohen, matt = supervised.evaluate_model(model, 6, 10)
-        print('{}'.format(key))
-        print('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
-        print('Bal. Accuracy: {} +/- {}'.format(round(statistics.mean(bal_acc), 3) , round(statistics.stdev(bal_acc), 3)))
-        print("Cohen's Kappa: {} +/- {}".format(round(statistics.mean(cohen), 3) , round(statistics.stdev(cohen), 3)))
-        print('Matt. Corr. Coef: {} +/- {}'.format(round(statistics.mean(matt), 3) ,round(statistics.stdev(matt), 3)))
+        if key != 'dnn':
+            acc, bal_acc, cohen, matt = supervised.evaluate_model(model, 3, 5)
+            print('{}'.format(key))
+            print('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
+            print('Bal. Accuracy: {} +/- {}'.format(round(statistics.mean(bal_acc), 3) , round(statistics.stdev(bal_acc), 3)))
+            print("Cohen's Kappa: {} +/- {}".format(round(statistics.mean(cohen), 3) , round(statistics.stdev(cohen), 3)))
+            print('Matt. Corr. Coef: {} +/- {}'.format(round(statistics.mean(matt), 3) ,round(statistics.stdev(matt), 3)))
 
-        joblib.dump(model, os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(key)))
+            a, b = supervised.contigency_table(model)
+            print(b)
 
-        a, b = supervised.contigency_table(model)
+def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: str = 'chebyshev'):  
 
-        print(a)
-        print(b)
+    seed, nan = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
+    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\4_class_mb.csv'))
 
-        print('========================================================================================')
+    scaler = RobustScaler()
+    scaler.fit(nan.iloc[:, 1:])
 
-def tuning(filename: str):
+    scaled_train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
+    scaled_train = pd.DataFrame(scaled_train)
+    scaled_test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
+    scaled_test = pd.DataFrame(scaled_test)
 
-    data = shuffle(os.path.join(os.getcwd(), 'bgc\\embedding\\{0}'.format(filename)))
-    
-    supervised = Supervised(data[0], data[1])
+    dim_reduction = DimensionalReduction(seed, scaled_test)
+
+    umap, train = dim_reduction.umap(neighbours=neighbour, input_metric=input_metric, output_metric=output_metric)
+    test_transformed = dim_reduction.transform(umap, scaled_test.iloc[:, 1:])
+
+    test = pd.DataFrame(np.column_stack((test.iloc[:, 0], test_transformed)))
+
+    supervised = Supervised(seed, train, test)
     supervised.hyperparameter_tuning()
 
 def shuffle(filename: str):
@@ -243,14 +246,47 @@ def antismash(file):
                         data = np.concatenate((data, np.array([vector])))
     np.savetxt('bgc\\antismash\\vectors\\{}_uniprot2vec.csv'.format(file.split('.')[0]), data, delimiter=',')
 
-def distance_matrix(file):
+def generate_models():
 
-    alignments = AlignIO.read(file, 'fasta')
-    # calculator = DistanceCalculator(aln, )
+    """
+        Generate final models and save them.
+    """
 
-    for alignment in alignments:
-        if 'BGC' in alignment.id:
-            print(alignment.id)
+    seed, train_antismash = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    seed, test_antismash = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
+    seed, mibig = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\4_class_mb.csv'))
+
+    scaler = RobustScaler()
+    scaler.fit(train_antismash.iloc[:, 1:])
+
+    joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\RobustScaler.model'))
+
+    train_antismash = np.column_stack((train_antismash.iloc[:, 0].astype(int), scaler.transform(train_antismash.iloc[:, 1:])))
+    test_antismash = np.column_stack((test_antismash.iloc[:, 0].astype(int), scaler.transform(test_antismash.iloc[:, 1:])))
+
+    dimreduction = DimensionalReduction(seed, train_antismash)
+    umap_1, data_1 = dimreduction.umap(input_metric='chebyshev', neighbours=90)
+    dimreduction.export_results(data_1, 'embedding_chebyshev_euclidean_90.csv')
+    umap_2, data_2 = dimreduction.umap(input_metric='chebyshev', output_metric='manhattan', neighbours=75)
+    dimreduction.export_results(data_2, 'embedding_chebyshev_manhattan_75.csv')
+    umap_3, data_3 = dimreduction.umap(input_metric='chebyshev', output_metric='chebyshev', neighbours=75)
+    dimreduction.export_results(data_3, 'embedding_chebyshev_chebyshev-75.csv')
+
+    joblib.dump(umap_1, os.path.join(os.getcwd(), 'bgc\\models\\UMAP_Chebyshev_Euclidean.model'))
+    joblib.dump(umap_2, os.path.join(os.getcwd(), 'bgc\\models\\UMAP_Chebyshev_Manhattan.model'))
+    joblib.dump(umap_3, os.path.join(os.getcwd(), 'bgc\\models\\UMAP_Chebyshev_Chebyshev.model'))
+
+    supervised = Supervised(seed, train_antismash, test_antismash)
+
+    models = {}
+
+    models['rf'] = supervised.rforest()
+    models['ada_rf'] = supervised.adaRforest()
+    models['knn'] = supervised.knn()
+    models['nn'] = supervised.neural_network()
+
+    for key, model in models.items():
+        pass
 
 if __name__ == "__main__":
 
@@ -304,39 +340,24 @@ if __name__ == "__main__":
         pool.map(antismash, os.listdir(os.path.join(os.getcwd(), 'bgc\\antismash\\antismash')))
     elif args.learn:
 
-        metrics = ['chebyshev', 'manhattan', 'euclidean', 'mahalanobis', 'minkowski', 'canberra']
-        weights = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        distances = [0, 0.001, 0.01, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        neighbours = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 75, 90, 100]
+        # metrics = ['euclidean', 'manhattan', 'chebyshev']
+        # metrics = [p for p in itertools.permutations(metrics, 2)]
 
-        comb = [distances, neighbours, weights]
-        comb = [p for p in itertools.product(*comb)]
-        metrics = [p for p in itertools.permutations(metrics, 2)]
+        # for metric in metrics:
+        #     learn(metric)
 
-        seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-        scaler = RobustScaler()
-        scaler.fit(data.iloc[:, 1:])
-
-        joblib.dump(scaler, os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
-
-        for metric in metrics:
-            for c in comb:
-                learn(metric, c)
+        learn(['euclidean', 'chebyshev'])
 
     elif args.build:
         pass
     elif args.operon:
         pass
     elif args.tuning:
-        tuning('umap_euclidean_euclidean_train_{0}.csv'.format(10))
+        tuning()
     elif args.supervised:
         classify(10)
     elif args.split:
         split(args.split)
-    elif args.svd:
-        svd(args.svd)
-    elif args.distance:
-        distance_matrix(os.path.join(os.getcwd(), 'bgc\\msa\\{0}'.format(args.distance)))
     else:
         # values = args.random.split(',')
         # rnd = RandomSequence(20000, 5000, 1000)
