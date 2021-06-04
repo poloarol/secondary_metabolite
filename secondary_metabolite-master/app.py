@@ -26,7 +26,23 @@ from utilities.analysis import Supervised
 from utilities.analysis import DimensionalReduction
 
 
-def learn(metric):
+def load_files():
+    
+    
+    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'))
+
+    scaler = RobustScaler().fit(train.iloc[:, 1:])
+
+    train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
+    test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
+
+    train = pd.DataFrame(train)
+    test = pd.DataFrame(test)
+    
+    return seed, train, test
+
+def umap_learn(metric):
     """
 
         Optimize UMAP by varying the metrics and neighbours. 
@@ -76,6 +92,56 @@ def learn(metric):
 
     # evaluate umap models using supervised learning
 
+def lda_learn(n_component: int):
+    
+    """
+    Optimize LDA algorithm to determine the number of components which 
+    allow for efficient seperation.
+    """
+    
+    seed, train, test = load_files()
+
+    dim_reduction = DimensionalReduction(seed, train)
+    
+    lda = dim_reduction.lda_learn(components=n_component)
+
+    
+    transformed_train = np.column_stack((train.iloc[:, 0], lda.transform(train.iloc[:, 1:])))
+    transformed_test = np.column_stack((test.iloc[:, 0], lda.transform(test.iloc[:, 1:])))
+    
+    transformed_train = pd.DataFrame(transformed_train)
+    transformed_test = pd.DataFrame(transformed_test)
+    
+    print('LDA Evaluation begins')
+    
+    evaluate_umap_model(seed=seed, train=transformed_train, test=transformed_test)
+    
+    print('LDA Evaluation ends')
+
+def nca_learn(n_component: int):
+    
+    """
+    Optimize NCA algorithm to determine the number of components which 
+    allow for efficient seperation.
+    """
+    
+    seed, train, test = load_files()
+
+    dim_reduction = DimensionalReduction(seed, train)
+    
+    nca = dim_reduction.nca_learn(components=n_component)
+    
+    transformed_train = np.column_stack((train.iloc[:, 0], nca.transform(train.iloc[:, 1:])))
+    transformed_test = np.column_stack((test.iloc[:, 0], nca.transform(test.iloc[:, 1:])))
+    
+    transformed_train = pd.DataFrame(transformed_train)
+    transformed_test = pd.DataFrame(transformed_test)
+    
+    print('NCA Evaluation begins')
+    
+    evaluate_umap_model(seed=seed, train=transformed_train, test=transformed_test)
+    
+    print('NCA Evaluation ends')
 
 def evaluate_umap_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> None:
 
@@ -87,7 +153,7 @@ def evaluate_umap_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> N
     models['ada_rf'] = supervised.adaRforest()
     models['nn'] = supervised.neural_network()
     models['knn'] = supervised.knn()
-    models['xg'] = supervised.xgboost()
+    # models['xg'] = supervised.xgboost()
 
     for key, model in models.items():
         accuracy, bal_accuracy, cohen_kappa, matt_corr_coef = supervised.evaluate_model(model, 3, 5)
@@ -99,9 +165,9 @@ def evaluate_umap_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> N
         print("Cohen's Kappa: {} +/- {}".format(statistics.mean(cohen_kappa), statistics.stdev(cohen_kappa)))
         print("Matthew's Corr. Coef: {} +/- {}".format(statistics.mean(matt_corr_coef), statistics.stdev(matt_corr_coef)))
 
-        cm.relabel(mapping={0: 'PKS', 1: 'NRPS', 3: 'Terpene', 4: 'Bacteriocin'})
+        # cm.relabel(mapping={0: 'PKS', 1: 'NRPS', 3: 'Terpene', 4: 'Bacteriocin'})
 
-        cm.print_matrix()
+        # cm.print_matrix()
 
 def split(filename: str):
 
@@ -211,7 +277,7 @@ def mibig(file):
                 rb = ReadGB(path)
                 # rb.to_fasta(os.path.join(os.getcwd(), 'bgc\\mibig\\bgcs\\{}.fasta'.format(line.strip())), line.strip())
                 vector = rb.get_vector()
-                vector = vector.flatten()
+                vector = vector.ravel()
 
                 if vector.shape[0] == 300:
                     if data.size == 0:
@@ -237,7 +303,7 @@ def antismash(file):
                 rb = ReadGB(path)
                 # rb.to_fasta(os.path.join(os.getcwd(), 'bgc\\antismash\\bgcs\\{0}'.format(p)))
                 vector = rb.get_vector()
-                vector = vector.flatten()
+                vector = vector.ravel()
 
                 if vector.shape[0] == 300:
                     if data.size == 0:
@@ -296,24 +362,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser('bcg-finder')
 
-    parser.add_argument('-t','--trainer', help='to train new NLP embedding')
-    parser.add_argument('-a','--antismash', help='download sequences form antiSMASH DB')
-    parser.add_argument('-m','--mibig', help='download sequences from MiBIG DB')
-    parser.add_argument('-l','--learn', help='apply Dimensional Reduction on protein embedding')
-    parser.add_argument('-b','--build', help='build clusters from genomes')
-    parser.add_argument('-o','--operon', help='build clusters from genomes')
-    parser.add_argument('-s','--supervised', help='Run Supervised learning on dataset')
-    parser.add_argument('-u','--tuning', help='Hyperparameter tuning of models')
-    parser.add_argument('-mp', '--mibig_predictions', help='Predict MiBiG classes')
-    parser.add_argument('-p', '--predict', help='Predict class of of BGC')
+    parser.add_argument('-e', '--embedding', help='to train new NLP embedding')
+    parser.add_argument('-a', '--antismash', help='download sequences form antiSMASH DB')
+    parser.add_argument('-m', '--mibig', help='download sequences from MiBIG DB')
+    parser.add_argument('-y', '--hyperparameter_tuning', help='Hyperparameter tuning of models')
     parser.add_argument('-i', '--split', help='Split dataset')
-    parser.add_argument('-v', '--svd', help='Perform single value decomposition on matrix')
-    parser.add_argument('-c', '--clustering', help='Cluster UMAP embedding')
-    parser.add_argument('-d', '--distance', help='Build phylogenetic distance matrix')
+    parser.add_argument('-l', '--lda', help='Evaluate LDA DR algorithm')
+    parser.add_argument('-n', '--nca', help='Evaluate NCA DR algorithm')
+    parser.add_argument('-u', '--umap', help='Evaluate UMAP DR algorithm')
 
     args = parser.parse_args()
 
-    if args.trainer:
+    if args.embedding:
         if args.trainer.lower().endswith('gz'):
             print('--------------------------- START UniProt BioVec Training ----------------------------------------------')
             try:
@@ -338,7 +398,7 @@ if __name__ == "__main__":
     elif args.antismash:
         pool = Pool()
         pool.map(antismash, os.listdir(os.path.join(os.getcwd(), 'bgc\\antismash\\antismash')))
-    elif args.learn:
+    elif args.umap:
 
         # metrics = ['euclidean', 'manhattan', 'chebyshev']
         # metrics = [p for p in itertools.permutations(metrics, 2)]
@@ -346,16 +406,18 @@ if __name__ == "__main__":
         # for metric in metrics:
         #     learn(metric)
 
-        learn(['euclidean', 'chebyshev'])
-
-    elif args.build:
-        pass
-    elif args.operon:
-        pass
-    elif args.tuning:
+        umap_learn(['euclidean', 'chebyshev'])
+    
+    elif args.lda:     
+        components: int = 4
+        for i in range(1, components):
+            lda_learn(i)
+    elif args.nca:
+        components: int = 4
+        for i in range(1, components):
+            nca_learn(i)
+    elif args.hyperparameter_tuning:
         tuning()
-    elif args.supervised:
-        classify(10)
     elif args.split:
         split(args.split)
     else:

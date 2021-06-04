@@ -5,8 +5,6 @@ import os
 from typing import Any, Dict, List, Tuple
 from dataclasses import dataclass
 
-
-
 import pycm
 import joblib
 import numpy as np
@@ -17,6 +15,9 @@ import tensorflow as tf
 from imblearn.over_sampling import SMOTE
 
 from umap import UMAP
+
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
@@ -37,13 +38,12 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 
 @dataclass
-class DimensionalReduction():
+class DimensionalReduction(object):
 
     """
 
-    Dimensional Reduction provides functions to perform dimensional reduction using umap-learn package.
-        https://pair-code.github.io/understanding-umap/
-        https://umap-learn.readthedocs.io/en/latest/index.html
+    Dimensional Reduction provides functions to perform dimensional reduction.
+        
     
     """
 
@@ -57,10 +57,13 @@ class DimensionalReduction():
 
         self.train = pd.DataFrame(np.column_stack((y, X)))
     
-    def learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1) -> UMAP:
+    def umap_learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1) -> UMAP:
 
         """
         Learns a UMAP dimensional reduction function.
+        
+        https://pair-code.github.io/understanding-umap/
+        https://umap-learn.readthedocs.io/en/latest/index.html
 
         Parameters
         ----------
@@ -135,7 +138,44 @@ class DimensionalReduction():
         
         except Exception as e:
             raise e('One model is not trained')
+    
+    
+    def lda_learn(self, solver: str = 'eigen', shrinkage: str = None, components: int = 3) -> LinearDiscriminantAnalysis:
+        
+        """
+        
+        Perform a LDA to reduce dimensions.
+        
+        Excerpt of the technique: 
+            The Fisher’s propose is basically to maximize the distance between the mean of each class 
+            and minimize the spreading within the class itself. Thus, we come up with two measures: 
+            the within-class and the between-class. However, this formulation is only possible 
+            if we assume that the dataset has a Normal distribution.
+        
+        For more: https://towardsdatascience.com/is-lda-a-dimensionality-reduction-technique-or-a-classifier-algorithm-eeed4de9953a
+            
+        """
+        
+        lda = LinearDiscriminantAnalysis(solver=solver, shrinkage=shrinkage, n_components=components)
+        lda.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        
+        return lda
 
+    
+    def nca_learn(self, components: int = 3, init:str = 'auto') -> NeighborhoodComponentsAnalysis:
+        
+        """
+        
+        Perform a NCA to reduce dimesions
+        
+        """
+        
+        nca = NeighborhoodComponentsAnalysis(n_components=components, init=init, random_state=self.seed)
+        nca.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+        
+        return nca
+        
+    
 
 @dataclass
 class Supervised(object):
