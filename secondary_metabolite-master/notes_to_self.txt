@@ -3,8 +3,8 @@
 
 # Natural Products labels
 
-PKS + Aryl Polyenes - 0
-NRPS + Siderophores - 1
+PKS + Aryl Polyenes - 1
+NRPS + Siderophores - 0
 NRPS - PKS - 2
 Terpene - 3
 Bacteriocin - 4

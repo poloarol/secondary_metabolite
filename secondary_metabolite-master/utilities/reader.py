@@ -14,16 +14,24 @@ from Bio import SeqIO
 @dataclass
 class ReadGB(object):
     """
+
+    Read GenBank files, and allow for conversion into numerical vectors for learning.
+
+    Parameters
+    ----------
+
+    file: Gb file
+    model: biovec model (NLP)
+    seq: vectors of the Gene Cluster
+
     """
 
     file: Any
-    cluster: str = ''
     model =  bv.models.load_protvec(os.path.join(os.getcwd(), 'bgc\\models\\biovec\\uniprot2vec.model'))
-    seq: str = ''
+    seq: str = np.array([])
 
     def __post_init__(self):
-        """
-        """
+        """ Reads the GB file and performs vectorial conversion. """
 
         self.records = SeqIO.parse(open(self.file, encoding='utf-8', errors='ignore'), 'genbank')
         try:
@@ -31,7 +39,12 @@ class ReadGB(object):
                 for feature in record.features:
                     if feature.type == 'CDS':
                         tmp: str = feature.qualifiers['translation'][0].strip()
-                        self.seq = f'{self.seq}{tmp}'
+
+                        if self.seq.size == 0:
+                            self.seq = np.array(self.model.to_vecs(tmp))
+                        else:
+                            bgc = np.array(self.model.to_vecs(tmp))
+                            self.seq = self.seq + bgc
                         
         except Exception as e:
             print(e.__repr__())
@@ -39,17 +52,11 @@ class ReadGB(object):
     def to_fasta(self, fasta_path: str):
 
         """
+        Write GB file into fastas format.
         """
         with open(fasta_path, 'w') as output_handle:
             output_handle.write(self.seq)
     
     def get_vector(self):
-        
-        try:
-            bgc_vector = np.array(self.model.to_vecs(self.seq))
-            return bgc_vector
-        except Exception as e:
-            print(e.__repr__)
-            
-            return np.array([])
+        return self.seq
 

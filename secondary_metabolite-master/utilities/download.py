@@ -11,6 +11,12 @@ from requests.models import HTTPError
 @dataclass
 class Scraper(object):
     """
+    WebScaper used to download sequences from MiBIG or antiSMASH DB.
+
+    Parameters
+    ----------
+    identifier (str): Identifier of the Gene Clusters
+
     """
 
     identifier: str = None
@@ -18,6 +24,7 @@ class Scraper(object):
 
     def mibig_download(self):
         """
+        Download sequences from the MiBIG DB and write them to file
         """
 
         url: str = 'https://mibig.secondarymetabolites.org/repository/{}/{}.1.region001.gbk'.format(self.identifier, self.identifier)
@@ -29,6 +36,13 @@ class Scraper(object):
 
     def antismash_download(self, url: str):
         """
+        Download sequences from the antiSMASH DB and write them to file.
+
+        Parameters
+        ----------
+
+        url(str): URL to BGC cluster in antiSMASH DB
+
         """
 
         try:
@@ -55,8 +69,17 @@ class Scraper(object):
 
     
 
-    def write_to_file(self, data, url, href):
+    def write_to_file(self, data, url, href) -> None:
         """
+        Write BGC cluster to file.
+
+        Parameters
+        ----------
+
+        data: Gene CLuster to write to file
+        url: link to Gene Cluster
+        href: link to Gene cluster
+        
         """
 
         if url != None or href != None:

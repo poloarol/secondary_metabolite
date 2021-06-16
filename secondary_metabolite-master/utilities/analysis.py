@@ -246,30 +246,6 @@ class Supervised(object):
 
         return xg
     
-    def dnn(self) -> tf.keras.models.Sequential:
-
-        # print(self.train.iloc[:, 1:][:5])
-
-        model = tf.keras.models.Sequential()
-        model.add(tf.keras.layers.Dense(3000, input_shape=(3, ), activation='relu', name='fc0'))
-        model.add(tf.keras.layers.Dense(2000, input_shape=(3, ), activation='relu', name='fc1'))
-        model.add(tf.keras.layers.Dense(1500, input_shape=(3, ), activation='relu', name='fc2'))
-        model.add(tf.keras.layers.Dense(750, input_shape=(3, ), activation='relu', name='fc3'))
-        model.add(tf.keras.layers.Dense(350, input_shape=(3, ), activation='relu', name='fc4'))
-        model.add(tf.keras.layers.Dropout(0.5))
-        model.add(tf.keras.layers.Dense(5, input_shape=(3, ), activation='softmax', name='fc5'))
-
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-6)
-        model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-
-        y = tf.keras.utils.to_categorical(self.train.iloc[:, 0]) # train
-        yy = tf.keras.utils.to_categorical(self.test.iloc[:, 0]) # test
-
-        model.fit(self.train.iloc[:, 1:], y, validation_data=(self.test.iloc[:, 1:], yy), verbose=2, batch_size=10, epochs=200)
-
-        model.evaluate(self.test.iloc[:, 1:], yy)
-
-        return model
 
     def save(self, model, filename: str = None) -> None:
         """
@@ -284,8 +260,30 @@ class Supervised(object):
 
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}_.model'.format(filename))
         joblib.dump(model, path)
+
     
     def evaluate_model(self, model: Any, splits: int,  rep: int) -> Tuple[List, List, List, List]:
+
+        """
+            Calculate statistics necessary for multi-classification model evaluation.
+
+            Statistics:
+            ----------
+            Bal. Accuracy, Accuracy, Cohen's Kappa and Matthews' Correlation Coefficient.
+
+            Parameters:
+            ----------
+            model: sklearn model to evaluate
+            splits: How to split the dataset
+            rep: Number of repetition neccessary for model evalution
+
+            Return
+            ------
+
+            Tuple(List, List, List, List) -> Tuple(accuarcy, bal. accuracy, cohen kappa, matt. corr. coef)
+
+        """
+
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
         cohen = []
         matt = []
@@ -302,7 +300,21 @@ class Supervised(object):
 
         return acc, bal_acc, cohen, matt
    
-    def contigency_table(self, model) -> Tuple[Dict, List]:
+    def confusion_matrix(self, model) -> pycm.ConfusionMatrix:
+
+        """
+        Generates a confusion matrix, showing how well model fairs for each class.
+
+        Parameters
+        ----------
+        model: sklearn model to evaluate
+
+        Return:
+        ------
+        Confusion Matrix produced by pycm
+        
+        """
+
         predicted = model.predict(self.test.iloc[:, 1:])
 
         cm  = pycm.ConfusionMatrix(actual_vector=np.array(self.test.iloc[:, 0]), predict_vector=predicted)
@@ -310,13 +322,30 @@ class Supervised(object):
         return cm
 
     def save(self, name: str, classifier) -> None:
+
+        """
+
+        Save Classifier
+
+        Parameters
+        ----------
+
+        name (str): Name of classifier
+        classifier: sklearn model to save
+
+
+        """
+
         path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(name))
         joblib.dump(classifier, path)
 
     def hyperparameter_tuning(self) -> None:
 
-        # scaler = StandardScaler()
-        # self.train.iloc[:, 1:] = scaler.fit_transform(self.train.iloc[:, 1:])
+        """
+
+        Tune Hyperparameters to find the best values for model performance
+
+        """
 
         rf_grid = {
             'bootstrap': [True, False],
@@ -344,53 +373,21 @@ class Supervised(object):
             'max_iter': [2000, 4000, 6000, 8000]
         }
 
-        cv: int = 10
-
-        # with open(os.path.join(os.getcwd(), 'bgc\\hyperparameters\\hyperparams.txt'), 'a') as f:
-
-        # f.write('=======================================================================')
-
-        estimator = MLPClassifier(random_state=self.seed)
-
-        grid_search = GridSearchCV(estimator=estimator, param_grid=nn_grid, cv=cv, n_jobs=-1)
-        grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-
-
-        print(grid_search.best_params_, grid_search.best_score_)
-
-        print('=======================================================================')
-
-        
-        estimator = KNeighborsClassifier()
-
-        grid_search = GridSearchCV(estimator=estimator, param_grid=knn_grid, cv=cv, n_jobs=-1)
-        grid_search.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
-
-
-        print(grid_search.best_params_, grid_search.best_score_)
-
-    def evaluate_keras(self, model: Any, splits: int, rep: int) -> Tuple[List, List, List]:
-        cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=rep, random_state=self.seed)
-        cohen = []
-        matt = []
-        bal_acc = []
-
-        for test_data, test_id in cv.split(self.test.iloc[:, 1:], self.test.iloc[:, 0]):
-            data = self.test.iloc[:, 1:].to_numpy()
-            label = self.test.iloc[:, 0].to_numpy()
-            y = np.argmax(model.predict(data[test_data]), axis=1)
-            class_names = ['PKS', 'NRPS', 'Terpene']
-            print(class_names[y])
-            # lbl = label[test_data]
-            # bal_acc.append(balanced_accuracy_score(lbl, y))
-            # cohen.append(cohen_kappa_score(lbl, y))
-            # matt.append(matthews_corrcoef(lbl, y))
-        
-        return bal_acc, cohen, matt
-
 
 @dataclass
 class NLP(object):
+
+    """
+    Assist in training biovec model to perform NLP.
+
+    Parameters
+    ----------
+
+    filename: DB to create embedding from i.e. learn vectorization
+    model: None
+
+
+    """
     
     filename: str
     model: Any = None
@@ -404,13 +401,17 @@ class NLP(object):
         np.random.seed(1042)
 
     def get(self):
+
+        """ Provide trained biovec model """
         return self.model
     
     def save(self, filename: str):
+        """ Save biovec model to file """
         path: str = os.path.join(os.getcwd(), 'bgc\\models\\biovec\\{0}.model'.format(filename))
         self.model.save(path)
     
     def load(self, filename: str):
+        """ Load biovec model into workspace """
         return bv.models.load_protvec(os.path.join(os.getcwd(), 'bgc\\models\\biovec\\{0}.model'.format(filename)))
 
 
