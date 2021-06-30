@@ -15,18 +15,21 @@ import tensorflow as tf
 from imblearn.over_sampling import SMOTE
 
 from umap import UMAP
+from umap import validation
 
 from sklearn.neighbors import NeighborhoodComponentsAnalysis
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import NearestNeighbors
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import pairwise_distances
 
 from sklearn.impute import KNNImputer
 
@@ -57,7 +60,7 @@ class DimensionalReduction(object):
 
         self.train = pd.DataFrame(np.column_stack((y, X)))
     
-    def umap_learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1) -> UMAP:
+    def umap_learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1, weight: float = 0.5) -> UMAP:
 
         """
         Learns a UMAP dimensional reduction function.
@@ -83,7 +86,7 @@ class DimensionalReduction(object):
 
         reducer = UMAP(random_state=self.seed, init='random', 
                         metric=in_metric, output_metric=out_metric, n_components=components,
-                        n_neighbors=neighbours, min_dist=distance)
+                        n_neighbors=neighbours, min_dist=distance, target_weight=weight, unique=True)
         
         reducer.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
@@ -174,8 +177,72 @@ class DimensionalReduction(object):
         nca.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
         
         return nca
-        
     
+
+    def trustworthiness(self, dataset: pd.DataFrame, embedded: pd.DataFrame, n_neighbors: int, metric: str = 'euclidean'):
+
+
+        """Expresses to what extent the local structure is retained.
+        The trustworthiness is within [0, 1]. It is defined as
+        .. math::
+            T(k) = 1 - \frac{2}{nk (2n - 3k - 1)} \sum^n_{i=1}
+                \sum_{j \in \mathcal{N}_{i}^{k}} \max(0, (r(i, j) - k))
+        where for each sample i, :math:`\mathcal{N}_{i}^{k}` are its k nearest
+        neighbors in the output space, and every sample j is its :math:`r(i, j)`-th
+        nearest neighbor in the input space. In other words, any unexpected nearest
+        neighbors in the output space are penalised in proportion to their rank in
+        the input space.
+        * "Neighborhood Preservation in Nonlinear Projection Methods: An
+        Experimental Study"
+        J. Venna, S. Kaski
+        * "Learning a Parametric Embedding by Preserving Local Structure"
+        L.J.P. van der Maaten
+        Parameters
+        ----------
+        X : array, shape (n_samples, n_features) or (n_samples, n_samples)
+            If the metric is 'precomputed' X must be a square distance
+            matrix. Otherwise it contains a sample per row.
+        X_embedded : array, shape (n_samples, n_components)
+            Embedding of the training data in low-dimensional space.
+        n_neighbors : int, optional (default: 5)
+            Number of neighbors k that will be considered.
+        metric : string, or callable, optional, default 'euclidean'
+            Which metric to use for computing pairwise distances between samples
+            from the original input space. If metric is 'precomputed', X must be a
+            matrix of pairwise distances or squared distances. Otherwise, see the
+            documentation of argument metric in sklearn.pairwise.pairwise_distances
+            for a list of available metrics.
+        Returns
+        -------
+        trustworthiness : float
+            Trustworthiness of the low-dimensional embedding.
+        """
+        dist_X = pairwise_distances(dataset, metric=metric)
+        if metric == 'precomputed':
+            dist_X = dist_X.copy()
+        # we set the diagonal to np.inf to exclude the points themselves from
+        # their own neighborhood
+        np.fill_diagonal(dist_X, np.inf)
+        ind_X = np.argsort(dist_X, axis=1)
+        # `ind_X[i]` is the index of sorted distances between i and other samples
+        ind_X_embedded = NearestNeighbors(n_neighbors).fit(embedded).kneighbors(
+            return_distance=False)
+
+        # We build an inverted index of neighbors in the input space: For sample i,
+        # we define `inverted_index[i]` as the inverted index of sorted distances:
+        # inverted_index[i][ind_X[i]] = np.arange(1, n_sample + 1)
+        n_samples = dataset.shape[0]
+        inverted_index = np.zeros((n_samples, n_samples), dtype=int)
+        ordered_indices = np.arange(n_samples + 1)
+        inverted_index[ordered_indices[:-1, np.newaxis],
+                    ind_X] = ordered_indices[1:]
+        ranks = inverted_index[ordered_indices[:-1, np.newaxis],
+                            ind_X_embedded] - n_neighbors
+        t = np.sum(ranks[ranks > 0])
+        t = 1.0 - t * (2.0 / (n_samples * n_neighbors *
+                            (2.0 * n_samples - 3.0 * n_neighbors - 1.0)))
+        return t
+
 
 @dataclass
 class Supervised(object):

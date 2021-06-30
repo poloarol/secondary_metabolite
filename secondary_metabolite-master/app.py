@@ -10,7 +10,7 @@ import argparse
 import itertools
 import statistics
 
-from typing import List
+from typing import Any, List
 from multiprocessing import Pool
 
 import pandas as pd
@@ -41,18 +41,17 @@ def load_files():
 
     """
     
-    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'))
+    # seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    # seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'))
 
-    scaler = RobustScaler().fit(train.iloc[:, 1:])
+    seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\mibig.csv'))
 
-    train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
-    test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
+    scaler = RobustScaler().fit(data.iloc[:, 1:])
 
+    train = np.column_stack((data.iloc[:, 0].astype(int), scaler.transform(data.iloc[:, 1:])))
     train = pd.DataFrame(train)
-    test = pd.DataFrame(test)
     
-    return seed, train, test
+    return seed, train
 
 def umap_learn(metric):
     """
@@ -67,37 +66,41 @@ def umap_learn(metric):
         metric (tuple[str, str]) e.g. (euclidean, euclidean)
     """
 
-    seed, train, test = load_files()
+    seed, train = load_files()
 
     dim_reduction = DimensionalReduction(seed, train)
 
     neighbours: List = [15, 30, 45, 60, 75, 90]
-    distances: List = [0.01, 0.1, 0.2, 0.3, 0.4, 0.5]
+    distances: List = [0.1, 0.2, 0.3, 0.4, 0.5]
+    weight: List = [0.1, 0.2, 0.3, 0.4, 0.5]
 
-    # all_permutations: List = [list(zip(neighbours, d)) for d in itertools.permutations(distances)]
-    all_permutations = list(itertools.product(neighbours, distances))
+    tmp = [neighbours, distances, weight]
+
+    all_permutations = list(itertools.product(*tmp))
 
     for permutation in all_permutations:
 
-            print('UMAP Evaluation - num. of neighbours: {} & Min. Dist: {}'.format(permutation[0], permutation[1]))
+            print('UMAP Evaluation - num. of neighbours: {} & Min. Dist: {} & Weight: {}'.format(permutation[0], permutation[1], permutation[2]))
 
-            umap = dim_reduction.umap_learn(in_metric=metric[0], out_metric=metric[1], neighbours=permutation[0], distance=permutation[1])
+            umap = dim_reduction.umap_learn(in_metric=metric[0], out_metric=metric[1], neighbours=permutation[0], distance=permutation[1], weight=permutation[2])
+            transformed_train = pd.DataFrame(np.column_stack((train.iloc[:, 0], umap.transform(train.iloc[:, 1:]))))
 
-            transformed_train = np.column_stack((train.iloc[:, 0], umap.transform(train.iloc[:, 1:])))
-            transformed_test = np.column_stack((test.iloc[:, 0], umap.transform(test.iloc[:, 1:])))
+            a = train.iloc[:, 1:].to_numpy()
+            b = transformed_train.iloc[:, 1:].to_numpy()
 
-            transformed_train = pd.DataFrame(transformed_train)
-            transformed_test = pd.DataFrame(transformed_test)
+            trust = dim_reduction.trustworthiness(a, b, permutation[0])
 
-            # print('Evaluating UMAP model')
+            a, b = train_test_split(transformed_train, test_size=0.33, random_state=seed)
 
-            evaluate_model(seed, transformed_train, transformed_test)
+            try:
+                with open(os.path.join(os.getcwd(), '{}_{}.txt'.format(metric[0], metric[1])), 'a') as f:
+                    s: str = "Neighbours: {}, Min. Dist.: {}, Target Weight: {} \n".format(*permutation)
+                    f.write('{} \n'.format(f))
+                    f.write(s)
+                    evaluate_model(seed=seed, train=a, test=b, file=f)
+            except Exception as e:
+                print(e.__repr__())
 
-            # print('UMAP evaluation ended')
-
-            # print('UMAP-learn ends - num. of neighbours: {} & Min. Dist: {}'.format(p[0], p[1]))
-
-        # evaluate umap models using supervised learning
 
 def lda_learn(n_component: int):
     
@@ -150,7 +153,7 @@ def nca_learn(n_component: int):
     
     print('NCA Evaluation ends')
 
-def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> None:
+def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame, file: Any) -> None:
 
     supervised = Supervised(seed, train, test)
 
@@ -163,7 +166,17 @@ def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> None:
     # models['xg'] = supervised.xgboost()
 
     for key, model in models.items():
-        accuracy, bal_accuracy, cohen_kappa, matt_corr_coef = supervised.evaluate_model(model, 3, 5)
+        accuracy, bal_accuracy, cohen_kappa, matt_corr_coef = supervised.evaluate_model(model, 3, 10)
+
+        s: str = "Model: {}, Accuracy: {} +/- {}, Bal. Accuracy: {} +/- {}, Cohen's Kappa: {} +/- {}, Matt. Corr. Coef. :{} +/- {} \n"\
+                    .format(key, statistics.mean(accuracy), statistics.stdev(accuracy), 
+                                    statistics.mean(bal_accuracy), statistics.stdev(bal_accuracy), 
+                                    statistics.mean(cohen_kappa), statistics.stdev(cohen_kappa), 
+                                    statistics.mean(matt_corr_coef), statistics.stdev(matt_corr_coef))
+        file.write(s)
+
+    file.write("===================================================================================================================================== \n")
+
         # cm = supervised.confusion_matrix(model)
 
         # if statistics.mean(accuracy) >= 0.7 and statistics.mean(bal_accuracy) >= 0.65 and statistics.mean(cohen_kappa) >= 0.65 and statistics.mean(matt_corr_coef) >= 0.65:
@@ -174,21 +187,23 @@ def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame) -> None:
         # print("Cohen's Kappa: {} +/- {}".format(statistics.mean(cohen_kappa), statistics.stdev(cohen_kappa)))
         # print("Matthew's Corr. Coef: {} +/- {}".format(statistics.mean(matt_corr_coef), statistics.stdev(matt_corr_coef)))
 
-        print(statistics.mean(accuracy), statistics.mean(bal_accuracy), statistics.mean(cohen_kappa), statistics.mean(matt_corr_coef))
+        # print(key)
+        # print(statistics.mean(accuracy), statistics.mean(bal_accuracy), statistics.mean(cohen_kappa), statistics.mean(matt_corr_coef))
 
         # cm.relabel(mapping={0: 'PKS', 1: 'NRPS', 3: 'Terpene', 4: 'Bacteriocin'})
 
         # cm.print_matrix()
+
 
 def split(filename: str):
 
     """Split dataset into training and testing set """
     seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\{0}'.format(filename)))
     tmp = data.sample(frac=1).reset_index(drop=True)
-    train, test = train_test_split(tmp, test_size=0.33, random_state=seed)
+    train, test = train_test_split(tmp, test_size=0.4, random_state=seed)
 
-    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\train.csv'), train, comments='', delimiter=',')
-    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\test.csv'), test, comments='', delimiter=',')
+    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'), train, comments='', delimiter=',')
+    np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'), test, comments='', delimiter=',')
 
 def classify(dim: int = 3):
 
@@ -418,7 +433,7 @@ if __name__ == "__main__":
         # for metric in metrics:
         #     learn(metric)
 
-        umap_learn(['chebyshev', 'chebyshev'])
+        umap_learn(['euclidean', 'chebyshev'])
     
     elif args.lda:     
         components: int = 4
