@@ -484,7 +484,10 @@ def cluster():
     data = pd.read_csv(os.path.join(os.getcwd(), 'subset_mibig_tanimoto.csv'))
     tmp = pd.DataFrame(data.iloc[:, :236])
 
-    clustering = Clustering(tmp)
+    rb = RobustScaler()
+    rb.fit(tmp)
+
+    clustering = Clustering(rb.transform(tmp))
     df = pd.DataFrame()
 
     linkages = ['ward', 'complete', 'average', 'single']
