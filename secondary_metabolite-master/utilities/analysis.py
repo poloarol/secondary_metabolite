@@ -5,12 +5,17 @@ import os
 from typing import Any, Dict, List, Tuple
 from dataclasses import dataclass
 
+from scipy.sparse import data
+from scipy.sparse.construct import random
+
 import pycm
 import joblib
 import numpy as np
 import pandas as pd
 import biovec as bv
 import tensorflow as tf
+
+import random
 
 from imblearn.over_sampling import SMOTE
 
@@ -26,6 +31,8 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+
+from sklearn.cluster import AgglomerativeClustering
 
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import matthews_corrcoef
@@ -185,7 +192,7 @@ class DimensionalReduction(object):
         """Expresses to what extent the local structure is retained.
         The trustworthiness is within [0, 1]. It is defined as
         .. math::
-            T(k) = 1 - \frac{2}{nk (2n - 3k - 1)} \sum^n_{i=1}
+            T(k) = 1 - \\frac{2}{nk (2n - 3k - 1)} \sum^n_{i=1}
                 \sum_{j \in \mathcal{N}_{i}^{k}} \max(0, (r(i, j) - k))
         where for each sample i, :math:`\mathcal{N}_{i}^{k}` are its k nearest
         neighbors in the output space, and every sample j is its :math:`r(i, j)`-th
@@ -242,6 +249,29 @@ class DimensionalReduction(object):
         t = 1.0 - t * (2.0 / (n_samples * n_neighbors *
                             (2.0 * n_samples - 3.0 * n_neighbors - 1.0)))
         return t
+
+
+@dataclass
+class Clustering(object):
+    """
+    Clustering class
+
+    data: pd.DataFrame
+    """
+
+    data: pd.DataFrame
+    
+
+    def hierachical_clustering(self, linkage: str = 'ward'):
+        """
+        """
+        
+        random.seed(1024)
+
+        model = AgglomerativeClustering(linkage=linkage, distance_threshold=0.0001, n_clusters=None)
+        model.fit(self.data)
+
+        return model
 
 
 @dataclass

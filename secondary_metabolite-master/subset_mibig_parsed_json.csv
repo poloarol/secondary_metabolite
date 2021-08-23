@@ -1,0 +1,240 @@
+database,database_id,biosyn_class,compound,smiles
+PubChem,3431,Polyketide,fumonisin,CCCCC(C)C(C(CC(C)CC(CCCCC(CC(C(C)N)O)O)O)OC(=O)CC(CC(=O)O)C(=O)O)OC(=O)CC(CC(=O)O)C(=O)O
+PubChem,4461,NRP,congocidine,CN1C=C(C=C1C(=O)NC2=CN(C(=C2)C(=O)NCCC(=N)N)C)NC(=O)CN=C(N)N
+PubChem,5983,Alkaloid,physostigmine,CC12CCN(C1N(C3=C2C=C(C=C3)OC(=O)NC)C)C
+PubChem,6197,Polyketide,cycloheximide,CC1CC(C(=O)C(C1)C(CC2CC(=O)NC(=O)C2)O)C
+PubChem,12560,Polyketide,erythromycin,CCC1C(C(C(C(=O)C(CC(C(C(C(C(C(=O)O1)C)OC2CC(C(C(O2)C)O)(C)OC)C)OC3C(C(CC(O3)C)N(C)C)O)(C)O)C)C)O)(C)O
+PubChem,14197,Other,fengycin,CC12CCC(=O)CC1CCC3C2CCC4(C3(CCC4C5=CC(=O)OC5)O)C
+PubChem,14421,Polyketide,aflatoxin,COC1=C2C3=C(C(=O)OCC3)C(=O)OC2=C4C5C=COC5OC4=C1
+PubChem,14957,NRP,Antimycin,CCCCCCC1C(C(OC(=O)C(C(OC1=O)C)NC(=O)C2=C(C(=CC=C2)NC=O)O)C)OC(=O)CC(C)C
+PubChem,14965,Polyketide,nogalamycin,CC1C(C(C(C(O1)OC2CC(C(C3=CC4=C(C(=C23)O)C(=O)C5=C(C=C6C(=C5C4=O)OC7C(C(C(C6(O7)C)O)N(C)C)O)O)C(=O)OC)(C)O)OC)(C)OC)OC
+PubChem,16547,Polyketide,"2,4-diacetylphloroglucinol",CC(=O)C1=C(C(=C(C=C1O)O)C(=O)C)O
+PubChem,23217,Polyketide,1-heptadecene,CCCCCCCCCCCCCCCC=C
+PubChem,29746,Terpene,geosmin,CC1CCCC2(C1(CCCC2)O)C
+PubChem,40486,Polyketide,calcimycin,CC1CCC2(C(CC(C(O2)C(C)C(=O)C3=CC=CN3)C)C)OC1CC4=NC5=C(O4)C=CC(=C5C(=O)O)NC
+PubChem,64715,Polyketide,compactin,CCC(C)C(=O)OC1CCC=C2C1C(C(C=C2)C)CCC3CC(CC(=O)O3)O
+ChemSpider,66267,Polyketide,Cinerubin B,CC[C@]1(C[C@@H](c2c(cc3c(c2O)C(=O)c4c(ccc(c4C3=O)O)O)[C@H]1C(=O)OC)O[C@H]5C[C@@H]([C@@H]([C@@H](O5)C)O[C@H]6C[C@H]7[C@@H]([C@@H](O6)C)O[C@H]8[C@@H](O7)CC(=O)[C@@H](O8)C)N(C)C)O
+PubChem,68072,Polyketide,Orsellinic acid,CC1=CC(=CC(=C1C(=O)O)O)O
+PubChem,68072,Polyketide,orsellinic acid,CC1=CC(=CC(=C1C(=O)O)O)O
+PubChem,72370,Polyketide,salinomycin,CCC(C1CCC(C(O1)C(C)C(C(C)C(=O)C(CC)C2C(CC(C3(O2)C=CC(C4(O3)CCC(O4)(C)C5CCC(C(O5)C)(CC)O)O)C)C)O)C)C(=O)O
+PubChem,73491,Other,Fosfomycin,CC1C(O1)P(=O)([O-])[O-].[Na+].[Na+]
+PubChem,84068,NRP,bleomycin,CC1=C(N=C(N=C1N)C(CC(=O)N)NCC(C(=O)N)N)C(=O)NC(C(C2=CN=CN2)OC3C(C(C(C(O3)CO)O)O)OC4C(C(C(C(O4)CO)O)OC(=O)N)O)C(=O)NC(C)C(C(C)C(=O)NC(C(C)O)C(=O)NCCC5=NC(=CS5)C6=NC(=CS6)C(=O)NCCC[S+](C)C)O
+PubChem,91706,NRP,Lyngbyatoxin,CC(C)C1C(=O)NC(CC2=CNC3=C(C=CC(=C23)N1C)C(C)(CCC=C(C)C)C=C)CO
+PubChem,107864,NRP,HC-toxin,CC1C(=O)NC(C(=O)N2CCCC2C(=O)NC(C(=O)N1)C)CCCCCC(=O)C3CO3
+PubChem,108014,Polyketide,dothistromin,C1C(OC2C1(C3=C(O2)C=C4C(=C3O)C(=O)C5=C(C=CC(=C5C4=O)O)O)O)O
+PubChem,114969,Terpene,coronafacic acid,CCC1CC2C(CCC2=O)C(=C1)C(=O)O
+PubChem,122810,NRP,destruxin,CCC(C)C1C(=O)N(C(C(=O)N(C(C(=O)NCCC(=O)OC(C(=O)N2CCCC2C(=O)N1)CC=C)C)C)C(C)C)C
+PubChem,125349,NRP,bacillibactin,CC1C(C(=O)OC(C(C(=O)OC(C(C(=O)O1)NC(=O)CNC(=O)C2=C(C(=CC=C2)O)O)C)NC(=O)CNC(=O)C3=C(C(=CC=C3)O)O)C)NC(=O)CNC(=O)C4=C(C(=CC=C4)O)O
+PubChem,126409,Polyketide,Benastatin B,CCCCCC1=C(C(=C2C(=C1)CCC3=C(C4=C(C=C32)C(C5=C(C4=O)C(=CC(=C5)O)O)(C)C)O)O)C(=O)O
+PubChem,126727,Polyketide,Homoanatoxin-a,CCC(=O)C1=CCCC2CCC1N2
+PubChem,129089,NRP,Xenocoumacin II,CC(C)CC(C1CC2=C(C(=CC=C2)O)C(=O)O1)NC(=O)C(C(C3CCCN3)O)O
+PubChem,133204,Other,2-hydroxyethylclavam,C1C2N(C1=O)CC(O2)CCO
+PubChem,135046,Terpene,3-deoxyaphidicolin,CC1(CCCC2(C1CCC3C24CCC(C(C3)C4)(CO)O)C)CO
+PubChem,160175,Other,bacilysin,CC(C(=O)OC(=O)C(CC1CCC(=O)C2C1O2)N)N
+PubChem,160478,Polyketide,Flaviolin,C1=C(C=C(C2=C1C(=O)C(=O)C=C2O)O)O
+PubChem,160483,Polyketide,endocrocin,CC1=CC2=C(C(=C1C(=O)O)O)C(=O)C3=C(C2=O)C=C(C=C3O)O
+PubChem,161532,Other,Desferrioxamine E,C1CCNC(=O)CCC(=O)N(CCCCCNC(=O)CCC(=O)N(CCCCCNC(=O)CCC(=O)N(CC1)O)O)O
+PubChem,177799,Polyketide,pederone,CC1C(OC(CC1=C)(C(C(=O)NC(C2CC(=O)C(C(O2)CC(COC)OC)(C)C)OC)O)OC)C
+PubChem,181567,NRP,brevianamide F,C1CC2C(=O)NC(C(=O)N2C1)CC3=CNC4=CC=CC=C43
+PubChem,185781,Terpene,botrydial,CC1CC(C2C(CC(C2(C1C=O)O)(C)C=O)(C)C)OC(=O)C
+PubChem,196802,NRP,eponemycin,CC(C)CCCCC(=O)NC(CO)C(=O)NC(CC(=C)C)C(=O)C1(CO1)CO
+PubChem,197707,NRP,Kalimantacin A,CC(CC=CC=CCCC(=C)CC(C)CC(=CC(=O)O)C)CC(=O)CC(CNC(=O)C(C)C(C)OC(=O)N)O
+PubChem,198084,Polyketide,resistoflavin,CC1=CC(=C2C3=C1C(=O)C=C4C3(C5=C(C2=O)C(=CC(=C5C(=O)C4(C)C)O)O)O)O
+PubChem,221187,Saccharide,amicetin,CC1C(CCC(O1)N2C=CC(=NC2=O)NC(=O)C3=CC=C(C=C3)NC(=O)C(C)(CO)N)OC4C(C(C(C(O4)C)N(C)C)O)O
+PubChem,222778,Polyketide,fumagillol,CC(=CCC1C(O1)(C)C2C(C(CCC23CO3)O)OC)C
+PubChem,368342,Polyketide,Landomycin A,CC1C(CCC(O1)OC2CC(OC(C2O)C)OC3C(OC(CC3O)OC4CCC(OC4C)OC5CC(OC(C5O)C)OC6C(OC(CC6O)OC7=C8C(=C(C=C7)O)C(=O)C9=C(C8=O)C(CC1=C9C(=CC(=C1)C)O)O)C)C)O
+ChemSpider,391754,NRP,surfactin,CC(C)CCCCCCCCC[C@@H]1CC(=O)N[C@H](C(=O)N[C@H](C(=O)N[C@@H](C(=O)N[C@H](C(=O)N[C@H](C(=O)N[C@@H](C(=O)N[C@H](C(=O)O1)CC(C)C)CC(C)C)CC(=O)O)C(C)C)CC(C)C)CC(C)C)CCC(=O)O
+ChemSpider,393914,Polyketide,Pseudomonic acid A,C[C@H]([C@H]1[C@@H](O1)C[C@H]2CO[C@H]([C@@H]([C@@H]2O)O)C/C(=C/C(=O)OCCCCCCCCC(=O)O)/C)[C@H](C)O
+PubChem,403671,Polyketide,Mensacaricin,CC1C(C23C(=O)C4=C(C(C2(O3)C(C1(C(=O)C5C(O5)C)O)O)OC)C(=CC=C4)OC)O
+PubChem,430602,NRP,tallysomycin A,CC1C(C(C(C(O1)OC(C(C2=NC(=CS2)C3=NC(=CS3)C(=O)NCCCC(CC(=O)NCCCNCCCCN)N)O)NC(=O)C(C(C)O)NC(=O)CC(C(C)NC(=O)C(C(C4=CN=CN4)OC5C(C(C(C(O5)CO)O)O)OC6C(C(C(C(O6)CO)O)OC(=O)N)O)NC(=O)C7=C(C(=NC(=N7)C(CC(=O)N)NCC(C(=O)N)N)N)C)O)O)O)N
+PubChem,442849,Polyketide,cichorine,CC1=C(C=C2C(=C1OC)CNC2=O)O
+PubChem,443757,Other,Esmeraldin,CC1C2=C3C(=CC=C2)NC4=C(C=CC=C4N3C5=C1C6=NC7=C(C=CC=C7N=C6C(=C5)C(=O)O)C(C)OC(=O)C8=C(C=CC=C8O)C)C(=O)O
+PubChem,445434,NRP,microcystin,CC1C(NC(=O)C(NC(=O)C(C(NC(=O)C(NC(=O)C(NC(=O)C(=C)N(C(=O)CCC(NC1=O)C(=O)O)C)C)CC(C)C)C(=O)O)C)CCCN=C(N)N)C=CC(=CC(C)C(CC2=CC=CC=C2)OC)C
+PubChem,445434,NRP,microcystin LR,CC1C(NC(=O)C(NC(=O)C(C(NC(=O)C(NC(=O)C(NC(=O)C(=C)N(C(=O)CCC(NC1=O)C(=O)O)C)C)CC(C)C)C(=O)O)C)CCCN=C(N)N)C=CC(=CC(C)C(CC2=CC=CC=C2)OC)C
+PubChem,446541,Polyketide,mycophenolic acid,CC1=C2COC(=O)C2=C(C(=C1OC)CC=C(C)CCC(=O)O)O
+PubChem,447545,Polyketide,neocarzinostatin ,CC1C(C(C(C(O1)OC2C(C=C3C2=CC#CC4C(O4)(C#C3)C5COC(=O)O5)OC(=O)C6=C(C=CC7=C6C=C(C=C7C)OC)O)NC)O)O
+PubChem,456419,Other,pneumocandin A0,CCC(C)CC(C)CCCCCCCCC(=O)NC1CC(C(NC(=O)C2C(C(CN2C(=O)C(NC(=O)C(NC(=O)C3CC(CN3C(=O)C(NC1=O)C(C)O)O)C(C(C4=CC=C(C=C4)O)O)O)C(CC(=O)N)O)C)O)O)O
+PubChem,456858,NRP,Echinocandin B,CCCCCCCCCCCCCCCC(=O)NC1CC(C(NC(=O)C2C(C(CN2C(=O)C(NC(=O)C(NC(=O)C3CC(CN3C(=O)C(NC1=O)C(C)O)O)C(C(C4=CC=C(C=C4)O)O)O)C(C)O)C)O)OCCCN)O
+PubChem,636718,NRP,hectochlorin,CC1C(OC(=O)C2=CSC(=N2)C(C(OC(=O)C3=CSC(=N3)C(OC1=O)C(C)(C)O)(C)C)OC(=O)C)CCCC(C)(Cl)Cl
+PubChem,636857,NRP,andrimid,CC=CC=CC=CC(=O)NC(CC(=O)NC(C(C)C)C(=O)C1C(C(=O)NC1=O)C)C2=CC=CC=C2
+PubChem,2826713,Other,alpha-galactosylceramide,CCCCCCCCCCCCCCCCCCCCCCCCCC(=O)NC(COC1C(C(C(C(O1)CO)O)O)O)C(C(CCCCCCCCCCCCCC)O)O
+PubChem,3008858,Terpene,Thaliandiol,CC(CC(=O)C=C(C)C)C1CCC2(C1(CCC34C2CCC5C3(C4)C(CC(C5(C)C)O)O)C)C
+PubChem,3034761,Polyketide,tautomycin,CC1CCC2(CCC(C(O2)C(C)CCC(C(C)C(=O)CC(C(C(C(C)C)OC(=O)CC(C3=C(C(=O)OC3=O)C)O)OC)O)O)C)OC1CCC(C)C(=O)C
+PubChem,3037873,NRP,mureidomycin B,CC(C(C(=O)NC=C1CC(C(O1)N2CCC(=O)NC2=O)O)NC(=O)C(CCSC)NC(=O)NC(CC3=CC(=CC=C3)O)C(=O)O)N(C)C(=O)C(CC4=CC(=CC=C4)O)N
+PubChem,3064514,Polyketide,7-deoxypactamycin,CCC1(C(C(C(C1(C)O)(COC(=O)C2=C(C=CC=C2O)C)O)NC3=CC=CC(=C3)C(=O)C)N)NC(=O)N(C)C
+PubChem,3072006,NRP,pyralomicin 1a,CC1=CC(=C(C2=C1OC3=C(C2=O)C=C(N3C4C=C(C(C(C4O)O)OC)CO)Cl)O)Cl
+PubChem,3081434,RiPP,Bottromycin A2,CC1CCN2C1C(=O)NC(C(=O)NC(C(=NCC2=O)NC(C(=O)NC(C(C)C3=CC=CC=C3)C(=O)NC(CC(=O)OC)C4=NC=CS4)C(C)(C)C)C(C)(C)C)C(C)C
+PubChem,3086563,NRP,bacillomycin D,CCC(C)CCCCCCCCCCC1CC(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NCCCCC(=O)NC(C(=O)NC(C(=O)N1)C(C)O)CC(=O)N)CCC(=O)N)CC(=O)N)CC2=CC=C(C=C2)O)CC(=O)N
+ChemSpider,4576669,NRP,Althiomycin,COC1=CC(=O)N(C1)C(=O)C2CSC(=N2)C(CO)NC(=O)C3=CSC(=CN=O)N3
+ChemSpider,4942838,Polyketide,Squalestatin S1,CC[C@H](C)C[C@H](C)/C=C/C(=O)O[C@@H]1[C@H]([C@]2(O[C@@H]([C@]([C@@]1(O2)C(=O)O)(C(=O)O)O)C(=O)O)CCC(=C)[C@H]([C@H](C)Cc3ccccc3)OC(=O)C)O
+PubChem,5280489,Terpene,beta-carotein,CC1=C(C(CCC1)(C)C)C=CC(=CC=CC(=CC=CC=C(C)C=CC=C(C)C=CC2=C(CCCC2(C)C)C)C)C
+PubChem,5280980,Other,CLAVULANIC ACID,C1C2N(C1=O)C(C(=CCO)O2)C(=O)O
+PubChem,5280980,Other,clavulanic acid,C1C2N(C1=O)C(C(=CCO)O2)C(=O)O
+PubChem,5280985,Polyketide,Actinorhodin,CC1C2=C(CC(O1)CC(=O)O)C(=C3C(=O)C=C(C(=O)C3=C2O)C4=CC(=O)C5=C(C6=C(C(OC(C6)CC(=O)O)C)C(=C5C4=O)O)O)O
+PubChem,5281730,Polyketide,bikaverin,CC1=CC(=CC2=C1C(=O)C3=C(C4=C(C(=C3O2)O)C(=O)C(=CC4=O)OC)O)OC
+PubChem,5281917,Polyketide,C-1027,CC1(C(C(C(C(O1)OC23C=CC=C2C#CC4=CC#CC3OC5=C(C=C(C=C5Cl)C(CC(=O)OCC4OC(=O)C6=C7C(=CC(=C6)OC)OC(=C)C(=O)N7)N)O)O)O)N(C)C)C
+PubChem,5287620,Polyketide,brefeldin A,CC1CCCC=CC2CC(CC2C(C=CC(=O)O1)O)O
+PubChem,5288382,Polyketide,geldanamycin,CC1CC(C(C(C=C(C(C(C=CC=C(C(=O)NC2=CC(=O)C(=C(C1)C2=O)OC)C)OC)OC(=O)N)C)C)O)OC
+PubChem,5323531,Polyketide,oviedomycin,CC1=C(C2=CC(=C3C(=C2C(=O)C1=O)C(=O)C4=C(C3=O)C(=CC=C4)O)O)O
+PubChem,5326384,Polyketide,hygrocin B,CCC1CCC(=O)C2=C(C(=CC3=C2C(=O)C4=C(C3=O)NC(=O)C=CC4(C(=O)OC(C(C=C1)O)C)C)C)O
+PubChem,5351560,Polyketide,chromomycin A3,CC1C(C(CC(O1)OC2C(CC3=C(C2=O)C(=C4C(=C3)C=C(C(=C4O)C)OC5CC(C(C(O5)C)OC(=O)C)OC6CC(C(C(O6)C)OC)O)O)C(C(=O)C(C(C)O)O)OC)OC7CC(C(C(O7)C)O)OC8CC(C(C(O8)C)OC(=O)C)(C)O)O
+PubChem,5359037,Polyketide,Griseoxanthone B,CC1=CC(=CC2=C1C(=O)C3=C(O2)C(=C(C=C3O)OC)C)O
+PubChem,5359485,PK - Terpene,alternariol,CC1=CC(=CC2=C1C3=C(C(=CC(=C3)O)O)C(=O)O2)O
+PubChem,5381207,Polyketide,bongkrekic acid,CC(CC=CCCC=CC=CCC(C(=CC=C(C)C(=O)O)C)OC)C=CC(=CC(=O)O)CC(=O)O
+PubChem,5384075,Polyketide,fredericamycin A,CC=CC=CC1=CC2=CC3=C(C(=C2C(=O)N1)O)C4(CC3)C(=O)C5=C(C6=C(C(=C5C4=O)O)C(=O)C(=CC6=O)OC)O
+PubChem,5386092,Polyketide,amphotericin,CC1C=CC=CC=CC=CC=CC=CC=CC(CC2C(C(CC(O2)(CC(CC(C(CCC(CC(CC(=O)OC(C(C1O)C)C)O)O)O)O)O)O)O)C(=O)O)OC3C(C(C(C(O3)C)O)N)O
+PubChem,5386092,Other,Amphotericin B,CC1C=CC=CC=CC=CC=CC=CC=CC(CC2C(C(CC(O2)(CC(CC(C(CCC(CC(CC(=O)OC(C(C1O)C)C)O)O)O)O)O)O)O)C(=O)O)OC3C(C(C(C(O3)C)O)N)O
+PubChem,5458191,Polyketide,griseorhodin A,CC1=CC2=CC3=C(C(=C2C(=O)O1)O)OC4(C5C3O5)C(C6=CC7=C(C=C6O4)C(=O)C(=CC7=O)OC)O
+PubChem,5467942,Terpene,cyclooctatin,CC(C)C1CCC2(C1=CCC(C3C(CC(C3C2)CO)O)(C)O)C
+PubChem,5477086,Polyketide,ansamitocin,CC1C2CC(C(C=CC=C(CC3=CC(=C(C(=C3)OC)Cl)N(C(=O)CC(C4(C1O4)C)OC(=O)C(C)C)C)C)OC)(NC(=O)O2)O
+PubChem,6433194,Polyketide,filipin,CCCCCC(C1C(CC(CC(CC(CC(CC(CC(C(=CC=CC=CC=CC=CC(C(OC1=O)C)O)C)O)O)O)O)O)O)O)O
+PubChem,6436188,Polyketide,aureothin,CC1=C(OC(=C(C1=O)C)OC)C2CCC(=CC(=CC3=CC=C(C=C3)[N+](=O)[O-])C)O2
+PubChem,6436285,Polyketide,fostriecin,CC(C=CC1CC=CC(=O)O1)(C(CC(C=CC=CC=CCO)O)OP(=O)(O)O)O
+PubChem,6436820,Polyketide,ebelactone,CCC(C)C(C(C)C(=O)C(C)C=C(C)CC(C)C1C(C(=O)O1)C)O
+PubChem,6437358,NRP,rhizoxin A,CC1C=CC2C(O2)(C(CC(OC(=O)C3C(O3)CC4CC1OC(=O)C4)C(C)C(C(=CC=CC(=CC5=COC(=N5)C)C)C)OC)O)C
+PubChem,6437838,Polyketide,piericidin A1,CC=C(C)C(C(C)C=C(C)C=CCC(=CCC1=C(C(=O)C(=C(N1)OC)OC)C)C)O
+PubChem,6437857,NRP,meleagrin,CC(C)(C=C)C12C=C(C(=O)N3C1(NC(=O)C3=CC4=CN=CN4)N(C5=CC=CC=C25)OC)O
+PubChem,6438143,Polyketide,dehydrocurvularin,CC1CCC/C=C/C(=O)C2=C(C=C(C=C2CC(=O)O1)O)O
+PubChem,6438267,Polyketide,angolamycin,CCC1C(C2C(O2)(C=CC(=O)C(CC(C(C(C(CC(=O)O1)O)C)OC3CC(C(C(O3)C)OC4CC(C(C(O4)C)O)(C)O)N(C)C)CC=O)C)C)COC5C(C(C(C(O5)C)O)OC)OC
+PubChem,6438329,Polyketide,calicheamicin,CCNC1COC(CC1OC)OC2C(C(C(OC2OC3C#CC=CC#CC4(CC(=O)C(=C3C4=CCSSSC)NC(=O)OC)O)C)NOC5CC(C(C(O5)C)SC(=O)C6=C(C(=C(C(=C6OC)OC)OC7C(C(C(C(O7)C)O)OC)O)I)C)O)O
+PubChem,6438401,NRP,cryptophyicin 1,CC1CNC(=O)C(NC(=O)C=CCC(OC(=O)C(OC1=O)CC(C)C)C(C)C2C(O2)C3=CC=CC=C3)CC4=CC(=C(C=C4)OC)Cl
+PubChem,6438438,Polyketide,Macbecin II,CC1CC(C(C(C=C(C(C(C=CC=C(C(=O)NC2=CC(=CC(=C2O)C1OC)O)C)C)OC(=O)N)C)C)OC)OC
+PubChem,6438453,Polyketide,galbonolide A,CCC1C(=CC(=C)CC(C=C(CC(C(=O)C(C(=O)O1)C)(CO)O)OC)C)C
+PubChem,6438594,Other,difficidin,CC1CC=CC=CC=CCCCC(C(=CC=CCC(OC(=O)CC1=C)CCC(=CC=C)C)C)OP(=O)(O)O
+PubChem,6438725,Polyketide,depudecin,CC(C1C(O1)C=CC2C(O2)C(C=C)O)O
+PubChem,6438908,NRP,Curacin A,CC1CC1C2=NC(CS2)C=CCCC=CC=C(C)CCC(CC=C)OC
+PubChem,6438908,NRP - PK,curacin A,CC1CC1C2=NC(CS2)C=CCCC=CC=C(C)CCC(CC=C)OC
+PubChem,6439426,Polyketide,BE-14106,CCCC=CCC1CC=CC=C(C=CC=CC(C(C=C(C=CC=CC(=O)N1)C)O)O)C
+PubChem,6439522,Other,isopropylstilbene,CC(C)C1=C(C=C(C=C1O)C=CC2=CC=CC=C2)O
+PubChem,6441014,Polyketide,asukamycin,C1CCC(CC1)C=CC=CC=CC(=O)NC2=CC(C3C(C2=O)O3)(C=CC=CC=CC(=O)NC4=C(CCC4=O)O)O
+PubChem,6442850,Polyketide,AF-toxin,CCC(C)C(C(=O)OC(C=CC=CC=CC(=O)O)C1(CO1)C)OC(=O)C(C(C)(C)O)O
+PubChem,6444177,Polyketide,FD-891,CC1C=C(C=C(C(=O)OC(CC=CC=CCC(C2C(C1O)O2)O)C(C)CCC(C(C)C(C(C)C(C)OC)O)O)C)C
+PubChem,6444206,Polyketide,elaiophylin,CCC1C(OC(CC1OC2CC(C(C(O2)C)O)O)(C(C)C(C(C)C3C(C=CC=CC(=O)OC(C(C=CC=CC(=O)O3)C)C(C)C(C(C)C4(CC(C(C(O4)C)CC)OC5CC(C(C(O5)C)O)O)O)O)C)O)O)C
+PubChem,6445669,Polyketide,candicidin,CC1C=CC=CC=CC=CC=CC=CC=CC(CC(C(C(CC(=O)CC(CC(CC(CC(=O)CCCC(=O)CC(=O)OC1C(C)CC(C)C(CC(=O)C2=CC=C(C=C2)N)O)O)O)O)O)C(=O)O)O)OC3C(C(C(C(O3)C)O)N)O
+PubChem,6446118,RiPP,Thiocillin I,CC=C1C2=NC(=CS2)C(=O)NC(C3=NC(=CS3)C(=O)NC(C4=NC(=CS4)C5=C(C=CC(=N5)C6=NC(=CS6)C7=NC(=CS7)C(=O)NC(=CC)C(=O)NCC(C)O)C8=NC(=CS8)C(=O)NC(C(=O)N1)C(C)O)C(C)O)C(C)(C)O
+PubChem,6449106,NRP - PK,cremimycin,CCCCCCC1CC(=O)CCCC(CC(=O)C2=C(C(CC2C=C(C=CC=CC(=O)N1)C)OC3CC(C(C(O3)C)O)OC)O)O
+PubChem,6449919,Saccharide,aculeximycin,CCCC(C(C)C(C(CC)C=CC(C(C)C1CC=C(C(C(C(CC(C(C(CC2CC(C(C(O2)(CC(C(CCC(CC(CC=C(C(=O)O1)CC)O)O)C)OC3C(C(C(C(O3)C)O)OC4CC(C(C(O4)C)O)N)OC5C(C(C(C(O5)C)O)O)O)O)O)O)O)C)O)OC6C(C(C(C(O6)CO)O)O)O)C)O)C)O)O)OC7CC(C(C(O7)C)O)(C)N
+PubChem,6450309,Other,Flexirubin,CCCCCCCCCCCCC1=C(C=C(C=C1OC(=O)C=CC=CC=CC=CC=CC=CC=CC=CC2=CC(=C(C=C2)O)C)C)O
+PubChem,6451096,Other,macrolactin A,CC1CCCC=CC=CC(CC(CC=CC=CC(CC=CC=CC(=O)O1)O)O)O
+PubChem,6474912,Other,Caryoynencin,C#CC#CC#CC#CC=CC=CC(CCCCC(=O)O)O
+PubChem,6477354,Polyketide,kedarcidin,CC1C(C(CC(O1)OC2COC(=O)C(CC3=NC(=C(C=C3)OC4C=C5C#CC2=CC#CC6C5(C4OC7CC(C(C(O7)C)O)(C)O)O6)Cl)NC(=O)C8=C(C=C9C=C(C(=C(C9=C8)OC)OC)OC(C)C)O)O)N(C)C
+PubChem,6481472,Other,Caprazamycin,CCCCCCCCCCCCCC(CC(=O)OC1CN(C(C(=O)N(C1C(=O)OC)C)C(C2C(C(C(O2)N3C=CC(=O)NC3=O)O)O)OC4C(C(C(O4)CN)O)O)C)OC(=O)CC(C)CC(=O)OC5C(C(C(C(O5)C)OC)OC)OC
+PubChem,6858006,Polyketide,avermectin,CCC(C)C1C(C=CC2(O1)CC3CC(O2)CC=C(C(C(C=CC=C4COC5C4(C(C=C(C5O)C)C(=O)O3)O)C)OC6CC(C(C(O6)C)OC7CC(C(C(O7)C)O)OC)OC)C)C
+PubChem,6917059,Polyketide,concanamycin A,CCC1C(C(CC(=CC=CC(C(OC(=O)C(=CC(=CC(C1O)C)C)OC)C(C)C(C(C)C2(CC(C(C(O2)C=CC)C)O)O)O)OC)C)C)O
+PubChem,6918547,Polyketide,ambruticin,CCC1C(=CCC(O1)C(=CC(C)C=CC2C(C2C=CC3C(C(CC(O3)CC(=O)O)O)O)C)C)C
+ChemSpider,8103672,Alkaloid,violacein,c1ccc2c(c1)/C(=C\3/C=C(NC3=O)c4c[nH]c5c4cc(cc5)O)/C(=O)N2
+ChemSpider,8226279,Polyketide,SNF4435D,CC1=CC(=C[C@@]2([C@H]1[C@]3([C@@H]2C4=CC=C(C=C4)[N+](=O)[O-])C[C@H](OC3)C5=C(C(=O)C(=C(O5)OC)C)C)C)C
+ChemSpider,8274723,NRP,brabantamide A,O=C2O\C(=C\C(=O)NC(=O)CC(O[C@@H]1O[C@H]([C@H](O)[C@@H](O)[C@H]1O)C)CCCCCCCCCCC)C3N2CCC3
+ChemSpider,8899707,NRP,Nostophycin,NC(=O)CC[C@H]4NC(=O)[C@@H](O)[C@@H](C[C@H](O)CCCc1ccccc1)NC(=O)[C@@H]2CCCN2C(=O)[C@H](NC(=O)[C@@H](NC(=O)[C@@H]3CCCN3C(=O)CNC4=O)Cc5ccccc5)[C@H](C)CC
+ChemSpider,8923602,NRP,fusaricidin B,C[C@@H]1[C@@H](C(=O)N[C@@H](C(=O)N[C@H](C(=O)N[C@@H](C(=O)N[C@@H](C(=O)N[C@@H](C(=O)O1)C)CCC(=O)N)[C@@H](C)O)C(C)C)C(C)C)NC(=O)CC(CCCCCCCCCCCCN=C(N)N)O
+PubChem,9237955,Terpene,2-methylisoborneol,COC(=O)C1CC(CN1CN2C(=S)OC(=N2)C3=CC(=CC=C3)Br)O
+ChemSpider,9676041,Terpene,welwitindolinone A isonitrile,CC4(C)[C@H]\1C[C@@H](Cl)[C@@](C)(C=C)C(/[N+]#[C-])=C/1[C@@]34C(=O)Nc2ccccc23
+PubChem,9811230,RiPP,trunkamide,CCC(C)C1C(=O)NC(C(=O)N2CCCC2C(=O)NC(C3=NC(CS3)C(=O)NC(C(=O)NC(C(=O)N1)COC(C)(C)C=C)C(C)OC(C)(C)C=C)CC4=CC=CC=C4)C
+PubChem,9833652,NRP,polymyxin B,CCC(C)CCCCC(=O)NC(CCN)C(=O)NC(C(C)O)C(=O)NC(CCN)C(=O)NC1CCNC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC1=O)CCN)CC2=CC=CC=C2)CC(C)C)CCN)CCN)C(C)O
+PubChem,9845622,NRP,pseurotin,CCC=CC(C(C1=C(C(=O)C2(O1)C(C(NC2=O)(C(=O)C3=CC=CC=C3)OC)O)C)O)O
+PubChem,9849230,NRP,leinamycin,CC1C2=NC(=CS2)C=CC=CC(=O)C(C=C(CCC3(CC(=O)N1)C(C(=O)SS3=O)(C)O)C)O
+PubChem,9887988,Polyketide,TAN-1612,CC(=O)C1=C(C2(C(=O)C3=C(C4=C(C=C(C=C4C=C3CC2(CC1=O)O)OC)O)O)O)O
+PubChem,9915668,NRP,epoxomicin,CCC(C)C(C(=O)NC(C(C)O)C(=O)NC(CC(C)C)C(=O)C1(CO1)C)NC(=O)C(C(C)CC)N(C)C(=O)C
+PubChem,9928039,Other,Violacein,C1=CC=C2C(=C1)C(=C3C=C(NC3=O)C4=CNC5=C4C=C(C=C5)O)C(=O)N2
+ChemSpider,9977735,NRP,Aeruginosin 98-C,Brc1c(O)ccc(c1)C[C@@H](O)C(=O)N[C@@H](C(=O)N2[C@H](C(=O)NCCCC/N=C(\N)N)C[C@@H]3CC[C@@H](OS(=O)(=O)O)C[C@H]23)[C@H](C)CC
+PubChem,9980845,NRP,fumiquinazoline D,CC1C(=O)N2C3N1C4(C5=NC6=CC=CC=C6C(=O)N5C(CC3(C7=CC=CC=C72)O)C(=O)N4)C
+PubChem,10100233,Polyketide,pamamycin,CCCC1CC2CCC(O2)C(C(=O)OC(C(C3CCC(O3)C(C(=O)O1)C)C)C(C)C4CCC(O4)CC(CCC)N(C)C)C
+PubChem,10101379,Polyketide,naphthomycin,CC1C=CC=CC=C(C(=O)NC2=C(C(=O)C3=C(C2=O)C=C(C(=C3C(=O)C(=CC(C(C(C=CC(CC=C(C(=O)CC1O)C)O)C)O)C)C)O)C)Cl)C
+ChemSpider,10207541,NRP,Tenellin,CCC(C)/C=C(\C)/C=C/C(=O)c1c(c(cn(c1=O)O)c2ccc(cc2)O)O
+ChemSpider,10222475,Polyketide,Citrinin,C[C@@H]1[C@H](OC=C2C1=C(C(=O)C(=C2O)C(=O)O)C)C
+PubChem,10245773,NRP,terezine D,CC1C(=O)NC(C(=O)N1)CC2=CNC3=C(C=CC=C23)CC=C(C)C
+PubChem,10259958,Polyketide,halstoctacosanolide,CCC(C(C)C(CC(C(C=C(C)CC(C)C1CC(C(C=CC=CCC(C(=O)CC2CCC(C(O2)(CC=C(C=C(C(C(=O)C=C(C(=O)O1)C)O)C)C)O)C)C)C)O)O)O)O)O
+PubChem,10342949,Terpene,paspaline B,CC12CCC3C(C1CCC4C2(C5=C(C4)C6=CC=CC=C6N5)C)(CCC(O3)C(C)(C)O)C=O
+PubChem,10373128,NRP,Onnamide A,CC1C(OC(CC1=C)(C(C(=O)NC2C3C(C(C(C(O3)CC(CCCC=CC=CC=CC(=O)NC(CCCN=C(N)N)C(=O)O)O)(C)C)OC)OCO2)O)OC)C
+ChemSpider,10476583,NRP,calyculinamide A,C[C@H]1[C@@H](C[C@@]2(C([C@H]([C@H](O2)[C@H](C[C@@H]([C@H](C)[C@@H]([C@H](C)/C=C(\C)/C(=C/C=C/C(=C/C(=O)N)/C)/C)O)O)OC)OP(=O)(O)O)(C)C)O[C@H]1C/C=C/C3=COC(=N3)[C@@H](C)CCNC(=O)[C@H]([C@H]([C@H](COC)N(C)C)O)O)O
+ChemSpider,10480436,Other,Pseudopyronine B,CCCCCCCC1=CC(=C(C(=O)O1)CCCCCC)O
+PubChem,10555282,RiPP,microcyclamide,CCC(C)C1C2=NC(=CS2)C(=O)NC(C3=NC(=CS3)C(=O)NC(C4=NC(=C(O4)C)C(=O)N1)C)CC5=CN=CN5C
+PubChem,10629643,RiPP,prenylagaramide B,CCC(C)C1C(=O)NC(C(=O)N2CCCC2C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N3CCCC3C(=O)N1)CC4=CC=C(C=C4)O)CC(C)C)CC5=CC=C(C=C5)OCC=C(C)C)CC(=O)N
+PubChem,10720367,RiPP,tenuecyclamide C,CC1C2=NC(=C(O2)C)C(=O)NCC3=NC(=CS3)C(=O)NC(C4=NC(=CS4)C(=O)N1)CCSC
+PubChem,11286230,Polyketide,nystatin A1,CC1C=CC=CCCC=CC=CC=CC=CC(CC2C(C(CC(O2)(CC(C(CCC(CC(CC(CC(=O)OC(C(C1O)C)C)O)O)O)O)O)O)O)C(=O)O)OC3C(C(C(C(O3)C)O)N)O
+PubChem,11456257,NRP,psymberin,CC1=C2CC(OC(=O)C2=C(C=C1O)O)C(C)C(CC3C(C(CC(O3)C(NC(=O)C(C(CC(=C)C)OC)O)OC)O)(C)C)O
+PubChem,11593018,Alkaloid,gonyautoxin 2,C1C(C(C23N1C(=NC(C2NC(=N3)N)COC(=O)N)N)(O)O)OS(=O)(=O)O
+PubChem,11669726,Polyketide,Lactimidomycin,CC1C=CC=CCCC=CC(=O)OC1C(=CC(C)C(=O)CC(CC2CC(=O)NC(=O)C2)O)C
+PubChem,11695330,NRP,salinosporamide,CC12C(C(=O)NC1(C(=O)O2)C(C3CCCC=C3)O)CCCl
+PubChem,12443340,Polyketide,terrein,CC=CC1=CC(=O)C(C1O)O
+PubChem,13895197,NRP,Didemnin B,CCC(C)C1C(CC(=O)OC(C(=O)C(C(=O)NC(C(=O)N2CCCC2C(=O)N(C(C(=O)OC(C(C(=O)N1)NC(=O)C(CC(C)C)N(C)C(=O)C3CCCN3C(=O)C(C)O)C)CC4=CC=C(C=C4)OC)C)CC(C)C)C)C(C)C)O
+PubChem,15177995,Polyketide,Aranciamycin,CC1C(C(C(C(O1)OC2C(C(C(=O)C3=CC4=C(C(=C23)O)C(=O)C5=C(C4=O)C=CC=C5O)(C)O)OC)OC)O)O
+PubChem,15573391,Other,Clavam-2-carboxylate,C1C2N(C1=O)CC(O2)C(=O)O
+PubChem,15596091,Polyketide,shamixanthone,CC1=CC2=C(C3=C1OCC(C3O)C(=C)C)C(=O)C4=C(C=CC(=C4O2)CC=C(C)C)O
+PubChem,16130280,RiPP,nisin A,CCC(C)C1C(=O)NC(=C)C(=O)NC(C(=O)NC(CSCC(C(=O)N1)NC(=O)C(=CC)NC(=O)C(C(C)CC)N)C(=O)NC2C(SCC(NC(=O)CNC(=O)C3CCCN3C2=O)C(=O)NC(CCCCN)C(=O)NC4C(SCC(NC(=O)CNC(=O)C(NC(=O)C(NC(=O)C(NC(=O)CNC4=O)C)CC(C)C)CCSC)C(=O)NC(CC(=O)N)C(=O)NC(CCSC)C(=O)NC(CCCCN)C(=O)NC5C(SCC6C(=O)NC(C(=O)NC(CSC(C(C(=O)N6)NC(=O)C(NC5=O)C)C)C(=O)NC(CO)C(=O)NC(C(C)CC)C(=O)NC(CC7=CNC=N7)C(=O)NC(C(C)C)C(=O)NC(=C)C(=O)NC(CCCCN)C(=O)O)CC8=CNC=N8)C)C)C)CC(C)C
+PubChem,16130335,RiPP,GE2270,CC1=C2C(=O)NCC(=O)NC(C3=NC(=CS3)C4=NC(=CS4)C5=C(C=CC(=N5)C6=NC(=CS6)C7=NC(CO7)C(=O)N8CCCC8C(=O)N)C9=NC(=CS9)C(=O)NC(C3=NC(=C(S3)COC)C(=O)NC(C(=N2)S1)CC(=O)NC)C(C)C)C(C1=CC=CC=C1)O
+PubChem,16131155,NRP,A47934,C1C2C(=O)NC(C3=CC(=CC(=C3)OC4=C(C=CC(=C4)C(C(=O)N2)N)OS(=O)(=O)O)O)C(=O)NC5C6=CC(=C(C(=C6)OC7=C(C=C(C=C7)C(C8C(=O)NC(C9=C(C(=CC(=C9)O)O)C2=C(C(=CC(=C2)C(C(=O)N8)NC5=O)Cl)O)C(=O)O)O)Cl)O)OC2=C(C=C1C=C2)Cl
+PubChem,16131418,NRP,Ristomycin A,CC1C(C(CC(O1)OC2C3C(=O)NC(C4=C(C(=CC(=C4)O)OC5C(C(C(C(O5)CO)O)O)O)C6=C(C=CC(=C6)C(C(=O)N3)NC(=O)C7C8=CC(=C(C(=C8)OC9=CC=C2C=C9)OC1C(C(C(C(O1)COC1C(C(C(C(O1)C)O)O)O)O)O)OC1C(C(C(C(O1)CO)O)O)OC1C(C(C(CO1)O)O)O)OC1=CC=C(C=C1)C(C1C(=O)NC(C2=CC(=C(C(=C2)OC2=C(C=CC(=C2)C(C(=O)N1)N)O)C)O)C(=O)N7)O)O)C(=O)OC)N)O
+chEMBL,16736974,Alkaloid,Scytonemin,c1cc2c(cc1)N=C\3C2=C(C(=O)/C3=C/c4ccc(cc4)O)C5=C6C(=Nc7c6cccc7)/C(=C\c8ccc(cc8)O)/C5=O
+PubChem,16759609,Polyketide,tautomycetin,CCC(=CC(=O)CC(C)CC(C)CCC(C(C)C(=O)CC(C(C)C(C)OC(=O)CC(C1=C(C(=O)OC1=O)C)O)O)O)C=C
+ChemSpider,17214520,NRP,Thalassospiramide A,CCCCCC/C=C\CC(=O)N[C@@H](CO)C(=O)N[C@@H](C(C)C)C(=O)N[C@@H](CO)[C@H](CC(=O)N[C@@H](C(C)C)C(=O)N[C@H]\1COC(=O)[C@@H](N(C(=O)[C@@H](NC(=O)/C=C1)C(C)C)C)Cc2ccc(cc2)O)O
+ChemSpider,19955692,Polyketide,stipitatic acid,c1c(cc(c(=O)cc1O)O)C(=O)O
+PubChem,20055307,Saccharide,Avilamycin C,CC1C(C(CC(O1)OC2C(OC3(CC2O)OC4C(OC(CC4(O3)C)OC5C(C(OC(C5OC)C)OC6C(OC(C(C6O)OC)OC7C(C8C(CO7)OC9(O8)C1C(C(C(O9)C)(C(C)O)O)OCO1)OC(=O)C(C)C)COC)O)C)C)O)OC(=O)C1=C(C(=C(C(=C1OC)Cl)O)Cl)C
+ChemSpider,21805429,Polyketide,maduropeptin,Cc1ccc(c(c1C(=O)N[C@@H]2CO[C@H]([C@@H]([C@]2(C)O)O)O[C@]34[C@@H](CC=C3C#C/C/5=C/CCC(=O)C[C@H](c6ccc(c(c6Cl)O[C@H]4C#C[C@H]5OC)OC)O)O)O)C
+PubChem,23724554,Polyketide,ECO-02301,CC1C(C(C(C(O1)OC(CC=CC=CC=CC=CC=CC(C(C)C(C(C)C=CCCC=CC=CC=CC=CC(=O)NC2=C(CCC2=O)O)O)O)C(C)C(=O)CC(CC(CC(C=CCC(CC(CC(CC(C=CCC(CC(CCCN)O)O)O)O)O)O)O)O)O)O)O)O
+PubChem,24755489,Polyketide,Erythromycin D,CCC1C(C(C(C(=O)C(CC(C(C(C(C(C(=O)O1)C)OC2CC(C(C(O2)C)O)(C)O)C)OC3C(C(CC(O3)C)N(C)C)O)(C)O)C)C)O)C
+PubChem,24762150,RiPP,patellin 3,CC(C)CC1C2=NC(CS2)C(=O)NC(C(=O)NC(C(=O)N3CCCC3C(=O)NC(C(=O)N4CCCC4C(=O)NC(C(=O)N1)C(C)OC(C)(C)C=C)C(C)C)CC(C)C)C(C)OC(C)(C)C=C
+PubChem,24847675,NRP,pristinamycin,CCC1C(=O)N2CCCC2C(=O)N(C(C(=O)N3CCC(=O)CC3C(=O)NC(C(=O)OC(C(C(=O)N1)NC(=O)C4=C(C=CC=N4)O)C)C5=CC=CC=C5)CC6=CC=CC=C6)C.CC1C=CC(=O)NCC=CC(=CC(CC(=O)CC2=NC(=CO2)C(=O)N3CCC=C3C(=O)OC1C(C)C)O)C
+PubChem,24900169,NRP,Xenortide B,CC(C)CC(C(=O)N(C)C(CC1=CC=CC=C1)C(=O)NCCC2=CNC3=CC=CC=C32)NC
+PubChem,24941628,Alkaloid,decarbamoylsaxitoxin,C1CN2C(=NC(C3C2(C1(O)O)N=C(N3)N)CO)N
+PubChem,25001002,Terpene,Marneral,CC1CCC(=C(C)C)C(C1(C)CCC=C(C)CCC=C(C)CCC=C(C)C)CCC=O
+PubChem,25053150,Alkaloid,cladoniamide G,CNC(=O)C1(C2=C(C3=C(C4=C(N3C1=O)C=CC(=C4)Cl)OC)NC5=C2C=C(C=C5)Cl)O
+PubChem,25220882,NRP,cyclomarin D,CC1C(=O)NC(C(=O)NC(C(=O)N(C(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N1)CC(C)CO)C(C2=CN(C3=CC=CC=C32)C(C)(C)C=C)O)C(C)C=C(C)C)CC(C)C)C)C(C)C)C(C4=CC=CC=C4)OC
+PubChem,25244585,NRP,Phosphinothricintripeptide,CP(=O)(CCC(C(=O)[O-])[NH3+])[O-]
+ChemSpider,27024550,Polyketide,phenylnannolone C,C/C(=C\C=C\c1ccccc1)/C=C/c2cccc(=O)o2
+ChemSpider,27026603,Polyketide,divergolide D,CC[C@@H]\1CCC(=O)c2c3c(cc(c2O)C)[C@@]4([C@H](/C=C(\C(=O)O[C@@H](/C=C1)[C@H](C=C(C)C)O)/C)C(=O)NC4=CC3=O)O
+ChemSpider,27475147,Polyketide,coelimycin P1,C/C=C/C(=O)/C/1=C/C(=C\2/C=CCCN2)/SC[C@@H](C(=O)O1)NC(=O)C
+ChemSpider,28184646,Polyketide,"(14Z)-1,14-Nonadecadiene",CCCC/C=C\CCCCCCCCCCCC=C
+ChemSpider,28288564,Terpene,Phenalinolactone A,Cc1ccc([nH]1)C(=O)OCC2(C3CCC4(C(C3(C(CC2OC(=O)C)O)C)CC=C(C4C5=C(C(=O)OC5O)O)C)C)CO[C@H]6CC[C@@H]([C@@H](O6)C)OC
+ChemSpider,28419936,RiPP,plantazolicin,CC[C@H](C)[C@@H](C1=NC(=CO1)C2=NC(=CO2)C3=NC(=CO3)C4=NC(=CO4)C5=NC(C(O5)C)C(=O)N[C@@H](CC6=CC=CC=C6)C(=O)O)NC(=O)[C@H]([C@@H](C)CC)NC(=O)C7=C(OC(=N7)C8=C(OC(=N8)C9=CSC(=N9)C1=C(OC(=N1)C1=CSC(=N1)C(CCCN=C(N)N)N(C)C)C)C)C
+ChemSpider,28536046,NRP,burkholderic acid,CCCCCCCCC/C=C(\C)/C(=O)c1cc(oc1O)C(=O)CC
+ChemSpider,29212820,NRP,Salinamide E,CC[C@@H](C)[C@@H]1C(=O)N[C@H](C(=O)N([C@H](C(=O)N[C@@H](C(=O)N[C@H](C(=O)O[C@@H]([C@@H](C(=O)N1)NC(=O)[C@H](C)[C@@H](C(C)C)O)C)CO)[C@@H](C)O)Cc2ccccc2)C)c3ccc(cc3)OC
+ChemSpider,32741751,NRP,A40926,CC(C)CCCCCCCCC(=O)N[C@@H]1[C@H]([C@@H]([C@H](O[C@H]1Oc2c3cc4cc2Oc5ccc(cc5Cl)[C@H]([C@H]6C(=O)N[C@@H](c7cc(cc(c7-c8cc(ccc8O)[C@H](C(=O)N6)NC(=O)[C@@H]4NC(=O)[C@@H]9c1cc(cc(c1Cl)O)Oc1ccc(cc1O)[C@H](C(=O)N[C@H](Cc1ccc(cc1)O3)C(=O)N9)NC)O[C@@H]1[C@H]([C@H]([C@@H]([C@H](O1)CO)O)O)O)O)C(=O)O)O)C(=O)O)O)O
+PubChem,38358410,Terpene,xiamycin A,CC12CCC(C(C1CCC3=CC4=C(C=C23)C5=CC=CC=C5N4)(C)C(=O)O)O
+PubChem,44227768,Other,bacillaene,CC(C)CC(C(=O)NCCCC=CC=CC(=CC=CC=C(C)C(CC(=O)NC(=CC=CC=CC(C)C(=O)O)C)O)C)O
+PubChem,44403674,Polyketide,apoptolidin,CC1C=C(C=C(C=C(C(=O)OC(CC(C(CCC=C(C=CC1OC2C(C(C(C(O2)C)OC)O)O)C)O)OC)C(C3(C(C(C(C(O3)CC(COC)OC4CC(C(C(O4)C)OC5CC(C(C(O5)C)O)OC)(C)O)C)O)C)O)O)C)C)C
+PubChem,44450228,Terpene,Platencin,CC1(C2CC3CCC2(CC3=C)C=CC1=O)CCC(=O)NC4=C(C=CC(=C4O)C(=O)O)O
+PubChem,44543739,Polyketide,13-epi-Dorrigocin A,CC(C=C(C)C(C(C)C(=O)CCCC1CC(=O)NC(=O)C1)O)C(C(C=CCCC=CC(=O)O)OC)O
+PubChem,44558924,NRP,anabaenopeptin,CC1C(=O)NC(C(=O)NCCCCC(C(=O)NC(C(=O)N(C(C(=O)N1C)CCC2=CC=C(C=C2)O)C)C(C)C)NC(=O)NC(CCCN=C(N)N)C(=O)O)CC3=CC=CC=C3
+PubChem,44559211,NRP,aspirochlorine,CON1C(=O)C2NC(=O)C13C(C4=CC(=C(C=C4O3)O)Cl)SS2
+PubChem,44559556,NRP,tolaasin I,CCCCCC(CC(=O)NC(=CC)C(=O)N1CCCC1C(=O)NC(CO)C(=O)NC(CC(C)C)C(=O)NC(C(C)C)C(=O)NC(CO)C(=O)NC(CC(C)C)C(=O)NC(C(C)C)C(=O)NC(C(C)C)C(=O)NC(CCC(=O)N)C(=O)NC(CC(C)C)C(=O)NC(C(C)C)C(=O)NC(=CC)C(=O)NC2C(OC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC2=O)C(C)CC)CCO)CCN)CCCCN)C)O
+PubChem,44566672,Polyketide,lobophorin B,CC1=CCCC2(C(O2)CCC(=CC3C(=C(CO3)COC(=O)C)CC1)C)C
+PubChem,44583793,NRP,cytochalasin K,CC1CC=CC2C(C(=C(C3C2(C(=O)NC3CC4=CC=CC=C4)OC(=O)OC=CC(C1=O)(C)O)C)C)O
+PubChem,44602381,RiPP,polytheonamide B,CCC(C)C(C(=O)NC(CC(=O)NC)C(=O)NC(C(C)C)C(=O)NC(C(C(=O)NC)O)C(=O)NC(C)C(=O)NC(CC(=O)NC)C(=O)NC(C(C)C)C(=O)NC(CO)C(=O)NC(C(C)C)C(=O)NC(CC(=O)N)C(=O)NC(C(=O)NC(CC(=O)N)C(=O)NC(CCC(=O)N)C(=O)NC(C(C)O)C(=O)NC(C(C)O)C(=O)O)C(C)(C)CS(=O)C)NC(=O)C(CC(=O)NC)NC(=O)CNC(=O)C(C(C)(C)O)NC(=O)C(C(C)(C)C)NC(=O)C(C(C(=O)NC)O)NC(=O)C(C(C)CC)NC(=O)C(CC(=O)NC)NC(=O)CNC(=O)CNC(=O)C(C)NC(=O)C(C(C)(C)O)NC(=O)C(C(C)CC(=O)N)NC(=O)C(CC(=O)NC)NC(=O)C(C(C)(C)C)NC(=O)CNC(=O)C(C)NC(=O)CNC(=O)C(C(C)(C)O)NC(=O)C(CC(=O)NC)NC(=O)C(C)NC(=O)C(C(C)(C)C)NC(=O)C(C)NC(=O)CNC(=O)C(C)NC(=O)C(C(C)(C)C)NC(=O)C(C(C)(C)C)NC(=O)C(C)NC(=O)C(C(C)(C)C)NC(=O)C(C(C)(C)C)NC(=O)C(C(C)(C)C)NC(=O)CNC(=O)C(C(C)(C)CC)NC(=O)CNC(=O)C(=O)CCC(C)(C)C
+PubChem,46926246,Saccharide,moenomycin,CC1C(C(C(C(O1)OC2C(OC(C(C2O)NC(=O)C)OC3C(C(C(OC3OP(=O)([O-])OCC(C(=O)[O-])OCC=C(C)CCC=CC(C)(C)CCC(=C)CC=C(C)CCC=C(C)C)C(=O)[O-])(C)O)OC(=O)N)COC4C(C(C(C(O4)CO)O)O)O)NC(=O)C)O)OC5C(C(C(C(O5)C(=O)NC6=C(CCC6=O)O)O)O)O
+PubChem,49787033,NRP,jamaicamide c,CC1C=CC(=O)N1C(=O)C=C(CCNC(=O)CCC=CC(C)CCC(=CCl)CCCC=C)OC
+PubChem,54586211,NRP,Arylomycin,CCCCCCCCCCCCCCCC(=O)N(C)C(CO)C(=O)NC(C)C(=O)NCC(=O)N(C)C1C2=CC(=C(C=C2)O)C3=C(C=CC(=C3)CC(NC(=O)C(NC1=O)C)C(=O)O)O
+PubChem,54675769,Saccharide,novobiocin,CC1=C(C=CC2=C1OC(=O)C(=C2O)NC(=O)C3=CC(=C(C=C3)O)CC=C(C)C)OC4C(C(C(C(O4)(C)C)OC)OC(=O)N)O
+PubChem,54679209,Polyketide,viridicatumtoxin,CC1=CCCC(C12CC3=C4C2=C(C=C(C4=C(C5=C3C(C6(CC(=O)C(=C(C6(C5=O)O)O)C(=O)N)O)O)O)O)OC)(C)C
+PubChem,54697674,NRP,kirromycin,CCC(C(=O)NCC=CC=C(C)C(C(C)C1C(C(C(O1)C=CC=CC=C(C)C(=C2C(=O)C=CNC2=O)O)O)O)OC)C3(C(C(C(C(O3)C=CC=CC)(C)C)O)O)O
+PubChem,54702959,Polyketide,SF2575,CC=C(C)C(=O)OC1C(OC(CC1O)C2=C(C3=C(C=C2)C(C4CC5C(C(=O)C(=C(C5(C(=O)C4=C3O)OC)O)C(=O)N)OC(=O)C6=CC=CC=C6O)(C)OC)O)C
+PubChem,54706138,Saccharide,clorobiocin,CC1=CC=C(N1)C(=O)OC2C(C(OC(C2OC)(C)C)OC3=C(C4=C(C=C3)C(=C(C(=O)O4)NC(=O)C5=CC(=C(C=C5)O)CC=C(C)C)O)Cl)O
+PubChem,54710080,NRP,aspyridone A,CCC(C)CC(C)C(=O)C1=C(C(=CNC1=O)C2=CC=C(C=C2)O)O
+PubChem,54720057,Saccharide,Coumermycin A1,CC1=CC=C(N1)C(=O)OC2C(C(OC(C2OC)(C)C)OC3=C(C4=C(C=C3)C(=C(C(=O)O4)NC(=O)C5=CNC(=C5C)C(=O)NC6=C(C7=C(C(=C(C=C7)OC8C(C(C(C(O8)(C)C)OC)OC(=O)C9=CC=C(N9)C)O)C)OC6=O)O)O)C)O
+PubChem,54736483,Polyketide,Simocyclinone D8,CC1C(C(CC(O1)C2=C(C3=C(C=C2)C(=O)C45C(C3O)(O4)C(CC6(C5(C(=O)C=C(C6)C)O)O)O)O)OC(=O)C=CC=CC=CC=CC(=O)NC7=C(C8=C(C(=C(C=C8)O)Cl)OC7=O)O)OC(=O)C
+PubChem,56682060,RiPP,cyclothiazomycin B,CC=C1C(=O)NC2(C(=O)NC(C(=O)NCC(=O)NC(=CC)C(=O)N3CCCC3C(=O)NC(C4=C(C=CC(=N4)C5=NC(=CS5)C6=NC(CS6)C(=O)NC(=C)C7=NC(=CS7)C8=NC(=CS8)C9=NC(CS9)C(=O)NC(CS2)C(=O)O)C(=O)NC(C2=NC(CS2)C(=O)N1)CC(=O)N)C)CCCNC(=N)N)C
+PubChem,56841540,Polyketide,lomaiviticin A,CCC1(C(C(=O)C2=C3C(=C(C4=C(C=CC(=O)C4=C3O)O)[O-])C(=C2C1OC5CC(C(C(O5)C)N(C)C)O)[N+]#N)C6C(C(C7=C(C8=C(C9=C(C=CC(=O)C9=C(C8=C7C6=O)O)O)[O-])[N+]#N)(CC)OC1CC(C(C(O1)C)N(C)C)O)OC1CC(C(C(O1)C)O)OC)OC1CC(C(C(O1)C)O)OC
+PubChem,56841540,Polyketide,Lomaiviticin A,CCC1(C(C(=O)C2=C3C(=C(C4=C(C=CC(=O)C4=C3O)O)[O-])C(=C2C1OC5CC(C(C(O5)C)N(C)C)O)[N+]#N)C6C(C(C7=C(C8=C(C9=C(C=CC(=O)C9=C(C8=C7C6=O)O)O)[O-])[N+]#N)(CC)OC1CC(C(C(O1)C)N(C)C)O)OC1CC(C(C(O1)C)O)OC)OC1CC(C(C(O1)C)O)OC
+PubChem,60209141,NRP,Spiruchostatin A,CC1C(=O)NC2CSSCCC=CC(CC(=O)N1)OC(=O)CC(C(NC2=O)C(C)C)O
+PubChem,66575233,Alkaloid,BE-54017,CN1C2=C(C=C(C=C2)Cl)C3=C1C4=C(C5=CC=CC=C5N4C6(C3(C(=O)N(C6=O)C)O)O)OC
+PubChem,70678896,Polyketide,tiacumicin B,CCC1C=C(C(CC=CC=C(C(=O)OC(CC=C(C=C(C1OC2C(C(C(C(O2)(C)C)OC(=O)C(C)C)O)O)C)C)C(C)O)COC3C(C(C(C(O3)C)OC(=O)C4=C(C(=C(C(=C4O)Cl)O)Cl)CC)O)OC)O)C
+PubChem,70697970,NRP,zorbamycin,CC1C(C(C(C(O1)OC(C2=CN=CN2)C(C(=O)NC(CCO)C(C(C)C(=O)NC(C(=O)NCCC3=NC(CS3)C4=NC(=CS4)C(=O)NCCC(=N)N)C(C)(C)O)O)NC(=O)C5=C(C(=NC(=N5)C(CC(=O)N)NCC(C(=O)N)N)N)C)OC6C(C(C(C(O6)CO)O)OC(=O)N)O)O)O
+PubChem,71308195,Polyketide,esperamicin,CC1C(C(C(C(O1)OC2C#CC=CC#CC3(C(C(=O)C(=C2C3=CCSSSC)NC(=O)OC)OC4CC(C(C(O4)C)O)OC(=O)C5=CC(=C(C=C5NC(=O)C(=C)OC)OC)OC)O)OC6CC(C(CO6)NC(C)C)OC)O)NOC7CC(C(C(O7)C)SC)O
+PubChem,71449303,NRP,spumigin E,CC1CC(N(C1)C(=O)C(CCC2=CC=C(C=C2)O)NC(=O)C(CC3=CC=C(C=C3)O)O)C(=O)NC(CCCN=C(N)N)C=O
+chEMBL,71455791,Polyketide,Abyssomicin C,CC1CC(C(=O)C2=C3C4(CC(C(O3)C(C4C=CC1=O)O)C)OC2=O)C
+PubChem,71460594,Polyketide,Fluostatin F,CC12C(O1)C(C3=C4C(=C(C=C3C2=O)O)C5=C(C4=O)C=CC=C5O)OC
+PubChem,71576813,Other,Photopyrone D,CC(C)CCCCCCC1=C(C=C(OC1=O)CC(C)C)O
+PubChem,71665768,NRP,Thailanstatin A,CC1CC(C(OC1CC=C(C)C=CC2C(C3(CC(O2)CC(=O)O)CO3)O)C)NC(=O)C=CC(C)OC(=O)C
+PubChem,90657423,Other,Endophenazine B,CC(=CCC1=CC(=O)C=C2C1=NC3=C(C=CC=C3N2C)C(=O)[O-])C
+PubChem,90658650,Other,Liposidomycin B,CC(C)CCCCCCCCCC(CC(=O)OC1CN(C(C(=O)N(C1C(=O)[O-])C)C(C2C(C(C(O2)C3C(=O)NC(=O)C=N3)OS(=O)(=O)[O-])O)OC4C(C(C(O4)C[NH3+])O)O)C)OC(=O)CC(C)CC(=O)[O-]
+PubChem,102196436,Alkaloid,borregomycin D,CN1C(=O)C2(C3=C(C4=C(C2(C1=O)O)C5=C(N4)C=C(C=C5)Cl)NC6=C3C=CC(=C6)Cl)O
+PubChem,102518265,Polyketide,JBIR-100,CC1CC(=CC=CCC(OC(=O)C(=CC(=CC(C1O)C)C)C)C(C)C(C(C)C2(CC(C(C(O2)C(C)C)C)OC(=O)C=CC(=O)O)O)O)C
+PubChem,102584107,Alkaloid,erdasporine C,COC(=O)C1C2=C3C4=CC=CC=C4NC3=C5C(=C2C(=O)N1)C6=CC=CC=C6N5
+PubChem,135171858,NRP,Bisdethiobis(methylthio)gliotoxin,CC(C)C(C)(C)OSC(C)(C)C
+PubChem,135309121,RiPP,Cinnamycin,CN1C=C2C(=N1)CCC(C(=O)N2C)N3CCC4=C(N(N=C4C3=O)CC5=CC=CC=C5)Cl
+chEBI,None,NRP,alpha-lipomycin,CC1C(C(CC(O1)OC(C(C)C)C(C)C=C(C)C=CC=CC=CC=CC(=C2C(=O)C(N(C2=O)C)CCC(=O)O)O)O)O
+chEBI,None,Terpene,ambiguine I isonitrile,CC1(C2CCC(C3(C2(C4=C(C(C5C3O5)(C)C)NC6=CC=CC1=C64)O)[N+]#[C-])(C)C=C)C
+chEMBL,None,NRP,massetolide A,CCCCCCC[C@H](CC(=O)NC(CC(C)C)C(=O)NC(CCC(=O)O)C(=O)NC1C(OC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC(=O)C(NC1=O)C(C)CC)CC(C)C)CO)CC(C)C)CO)C(C)CC)C)O
+chEMBL,None,NRP,Phenoxymethylpenicillin ,[H][C@]12SC(C)(C)[C@@H](N1C(=O)[C@H]2NC(=O)COC1=CC=CC=C1)C(O)=O
+chEBI,None,Polyketide,Polyketomycin,C[C@@H]1[C@H](CC[C@@H](O1)OC2C(=O)C(=C(C3(C2(CC4=C(C5=C(C(=O)C=C(C5=O)OC)C(=C4C3=O)O)C)O)O)O)C(=O)C)O[C@H]6C[C@@]([C@@H]([C@@H](O6)C)OC(=O)C7=C(C=CC(=C7O)C)C)(C)O
+chEBI,None,Polyketide,Urdamycin A,CC1C(CCC(O1)OC23C(=O)CC(CC2(C=CC4=C3C(=O)C5=C(C4=O)C(=C(C=C5)C6CC(C(C(O6)C)O)OC7CCC(C(O7)C)OC8CC(C(C(O8)C)O)O)O)O)(C)O)O
