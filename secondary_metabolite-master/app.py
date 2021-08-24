@@ -15,8 +15,8 @@ from scipy.cluster.hierarchy import dendrogram
 
 from Bio import Entrez, SeqIO
 
-from pinky.smiles import smilin
-from pinky.fingerprints import ecfp
+# from pinky.smiles import smilin
+# from pinky.fingerprints import ecfp
 
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
@@ -120,7 +120,7 @@ def umap_learn(metric):
 
             print(e.__repr__())
     
-    analysis_data.to_csv('{}_{}.csv'.format(metric[0], metric[1]))
+    analysis_data.to_excel('{}_{}.xlsx'.format(metric[0], metric[1]), index=False)
 
 def lda_learn(n_component: int):
     
@@ -188,10 +188,10 @@ def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame, trust: fl
     for key, model in models.items():
         accuracy, bal_accuracy, cohen_kappa, matt_corr_coef = supervised.evaluate_model(model, 3, 10)
 
-        acc: str = '{} +/- {}'.format(statistics.mean(accuracy), statistics.stdev(accuracy))
-        bal_acc: str = '{} +/- {}'.format(statistics.mean(bal_accuracy), statistics.stdev(bal_accuracy))
-        c_kappa: str = '{} +/- {}'.format(statistics.mean(cohen_kappa), statistics.stdev(cohen_kappa))
-        matt_corr: str = '{} +/- {}'.format(statistics.mean(matt_corr_coef), statistics.stdev(matt_corr_coef))
+        acc: int = statistics.mean(accuracy)
+        bal_acc: int = statistics.mean(bal_accuracy)
+        c_kappa: int = statistics.mean(cohen_kappa)
+        matt_corr: int = statistics.mean(matt_corr_coef)
         
         new_row = [key, params[0], params[1], params[2], trust, acc, bal_acc, c_kappa, matt_corr]
 
@@ -669,7 +669,7 @@ if __name__ == "__main__":
     elif args.umap:
 
         metrics = ['euclidean', 'manhattan', 'chebyshev']
-        metrics = [p for p in itertools.permutations(metrics, 2)]
+        metrics = [p for p in itertools.product(metrics, repeat=2)]
 
         for metric in metrics:
             umap_learn(metric)

@@ -13,7 +13,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import biovec as bv
-import tensorflow as tf
+# import tensorflow as tf
 
 import random
 
@@ -93,7 +93,7 @@ class DimensionalReduction(object):
 
         reducer = UMAP(random_state=self.seed, init='random', 
                         metric=in_metric, output_metric=out_metric, n_components=components,
-                        n_neighbors=neighbours, min_dist=distance, target_weight=weight, unique=True)
+                        n_neighbors=neighbours, min_dist=distance, target_weight=weight)
         
         reducer.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
@@ -149,7 +149,6 @@ class DimensionalReduction(object):
         except Exception as e:
             raise e('One model is not trained')
     
-    
     def lda_learn(self, solver: str = 'eigen', shrinkage: str = None, components: int = 3) -> LinearDiscriminantAnalysis:
         
         """
@@ -171,7 +170,6 @@ class DimensionalReduction(object):
         
         return lda
 
-    
     def nca_learn(self, components: int = 3, init:str = 'auto') -> NeighborhoodComponentsAnalysis:
         
         """
@@ -185,7 +183,6 @@ class DimensionalReduction(object):
         
         return nca
     
-
     def trustworthiness(self, dataset: pd.DataFrame, embedded: pd.DataFrame, n_neighbors: int, metric: str = 'euclidean'):
 
 
