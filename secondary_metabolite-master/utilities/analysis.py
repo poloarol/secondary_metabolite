@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from scipy.sparse import data
 from scipy.sparse.construct import random
+from sklearn import neural_network
 
 import pycm
 import joblib
@@ -443,13 +444,13 @@ class Supervised(object):
 
         rf_grid = {
             'bootstrap': [True, False],
-            'n_estimators': [2, 10, 100, 1000],
+            'n_estimators': [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000],
             'max_features': ['log2', 'auto', 'sqrt', None],
             'criterion': ['gini', 'entropy'],
-            'class_weight': [None, 'balanced', 'balanced_subsample']
-            # 'max_depth': np.linspace(1, 1024, 128, endpoint=True),
-            # 'min_samples_split': np.linspace(0.1, 1.0, 10, endpoint=True),
-            # 'min_samples_leaf': np.linspace(0.1, 0.5, 5, endpoint=True)
+            'class_weight': [None, 'balanced', 'balanced_subsample'],
+            'max_depth': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, None],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 4],
         }
 
         knn_grid = {
@@ -466,7 +467,31 @@ class Supervised(object):
             'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (100, 100, 100), (150, 150, 150)],
             'max_iter': [2000, 4000, 6000, 8000]
         }
+        
+        xg_grid = {
+            'max_depth': range(2, 10, 1),
+            'n_estimators': range(60, 220, 40),
+            'learning_rate': [0.1, 0.05, 0.01]
+        }
 
+        ada_grid = {
+            'base_estimator__bootstrap': [True, False],
+            'n_estimators': [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000],
+            'base_estimator__max_features': ['log2', 'auto', 'sqrt', None],
+            'base_estimator__criterion': ['gini', 'entropy'],
+            'base_estimator__class_weight': [None, 'balanced', 'balanced_subsample'],
+            'base_estimator__max_depth': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, None],
+            'base_estimator__min_samples_split': [2, 5, 10],
+            'base_estimator__min_samples_leaf': [1, 2, 4],
+        }
+
+        grids = {'rf': [self.rforest(), rf_grid], 'ada': [self.adaRforest(), ada_grid]: 'nn': [self.neural_network(), nn_grid], 'xg': [self.xgboost(), xg_grid], 'knn': [self.knn(), knn_grid]}
+
+        for key, value in grids:
+            gridcv = GridSearchCV(value[0], param_grid=value[1])
+            gridcv.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
+
+            print(key, gridcv.best_params_, gridcv.best_score_)
 
 @dataclass
 class NLP(object):

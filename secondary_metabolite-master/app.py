@@ -250,28 +250,25 @@ def classify(dim: int = 3):
             a, b = supervised.contigency_table(model)
             print(b)
 
-def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: str = 'chebyshev'):  
+def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: str = 'chebyshev', seed: int = 1042):  
 
-    seed, nan = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
-    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\4_class_mb.csv'))
+    seed, train = load_files()
 
-    scaler = RobustScaler()
-    scaler.fit(nan.iloc[:, 1:])
+    rb: Any = None
 
-    scaled_train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
-    scaled_train = pd.DataFrame(scaled_train)
-    scaled_test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
-    scaled_test = pd.DataFrame(scaled_test)
+    dim_reduction = DimensionalReduction(seed, train)
+    umap = dim_reduction.umap_learn(in_metric="chebyshev", out_metric='euclidean', neighbours=30, distance=0.1, weight=0.3)
 
-    dim_reduction = DimensionalReduction(seed, scaled_test)
+    with open(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'), 'rb') as f:
+        rb = joblib.load(f)
+    
+    with open(os.path.join(os.getcwd(), 'bgc\\models\\umap\\umap_chebyshev_euclidean_30_0.1_0.3.model'), 'rb') as f:
+        umap = joblib.load(f)
+    
+    transformed_train = pd.DataFrame(train.iloc[:, 0], umap.transform(train.iloc[:, 1:]))
+    tmp_train, tmp_test = train_test_split(transformed_train, test_size=0.33, random_state=seed)
 
-    umap, train = dim_reduction.umap(neighbours=neighbour, input_metric=input_metric, output_metric=output_metric)
-    test_transformed = dim_reduction.transform(umap, scaled_test.iloc[:, 1:])
-
-    test = pd.DataFrame(np.column_stack((test.iloc[:, 0], test_transformed)))
-
-    supervised = Supervised(seed, train, test)
+    supervised = Supervised(seed, tmp_train, tmp_test)
     supervised.hyperparameter_tuning()
 
 def shuffle(filename: str):
@@ -352,18 +349,21 @@ def get_best_umap_models():
     dim_reduction = DimensionalReduction(seed, train)
 
     all_parameters: Dict = {
-        'chebyshev-euclidean': [[60, 0.1, 0.1], [15, 0.4, 0.1], [45, 0.2, 0.1]],
-        'chebyshev-manhattan': [[60, 0.1, 0.1], [15, 0.3, 0.1]]
+        'chebyshev-chebyshev': [[75, 0.1, 0.1], [60, 0.1, 0.2], [45, 0.1, 0.2], [30, 0.1, 0.2], [45, 0.2, 0.2], [45, 0.2, 0.3], [60, 0.2, 0.2]],
+        'chebyshev-manhattan': [[15, 0.1, 0.1], [15, 0.3, 0.2], [15, 0.2, 0.1]],
+        'chebyshev-euclidean': [[30, 0.1, 0.2], [30, 0.1, 0.3], [30, 0.2, 0.3], [30, 0.4, 0.3]],
+        'euclidean-chebyshev': [[15, 0.4, 0.4], [15, 0.1, 0.3], [15, 0.5, 0.3]]
     }
 
-    df = pd.DataFrame(columns=['Model', 'In-metric', 'Out-metric', 'neighbours', 'dist', 'weight', 'trustworthiness', 'acc', 'bal. acc', 'kappa', 'matt'])
+    df = pd.DataFrame(columns=['Model', 'In-metric', 'Out-metric', 'Neigh.', 'Dist.', 'Weight', 'trustworthiness', 'acc', 'bal. acc', 'kappa', 'matt'])
 
     for key, values in all_parameters.items():
         for value in values:
             metric = key.split('-')
             umap = dim_reduction.umap_learn(in_metric='chebyshev', out_metric=metric[1], components=2, neighbours=value[0], distance=value[1], weight=value[2])
 
-            transformed_train = pd.DataFrame(np.column_stack((train.iloc[:, 0], umap.transform(train.iloc[:, 1:]))))
+            transformed_train = pd.DataFrame(np.column_stack((train.iloc[:, 0], umap.transform(train.iloc[:, 1:]))), columns=['biosyn_class', 'Dim1', 'Dim2'])
+            transformed_train.to_excel('embedding_{}_{}_{}_{}.xlsx'.format(key, value[0], value[1], value[2]), index=False)
 
             a = train.iloc[:, 1:].to_numpy()
             b = transformed_train.iloc[:, 1:].to_numpy()
@@ -395,13 +395,13 @@ def get_best_umap_models():
                 c_kappa: str = '{} +/- {}'.format(round(statistics.mean(cohen_kappa), 5), round(statistics.stdev(cohen_kappa), 5))
                 matt_corr: str = '{} +/- {}'.format(round(statistics.mean(matt_corr_coef), 5), round(statistics.stdev(matt_corr_coef), 5))
 
-                tmp = str(value)[1:-1]
+                tmp = value
 
-                row = [k_model, metric[0], metric[1], tmp, trust, acc, bal_acc, c_kappa, matt_corr]
+                row = [k_model, metric[0], metric[1], tmp[0], tmp[1], tmp[2], trust, acc, bal_acc, c_kappa, matt_corr]
 
                 df.loc[len(df.index)] = row
     
-    df.to_csv('umap_best_models_params.csv', index=False)
+    df.to_excel('umap_best_models_params.xlsx', index=False)
 
 def __parse_json__(file):
 
