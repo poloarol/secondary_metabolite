@@ -414,24 +414,6 @@ class Supervised(object):
 
         return cm
 
-    def save(self, name: str, classifier) -> None:
-
-        """
-
-        Save Classifier
-
-        Parameters
-        ----------
-
-        name (str): Name of classifier
-        classifier: sklearn model to save
-
-
-        """
-
-        path =  os.path.join(os.getcwd(), 'bgc\\models\\supervised\\{}.model'.format(name))
-        joblib.dump(classifier, path)
-
     def hyperparameter_tuning(self) -> None:
 
         """

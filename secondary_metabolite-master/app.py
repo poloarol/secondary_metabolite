@@ -15,8 +15,8 @@ from scipy.cluster.hierarchy import dendrogram
 
 from Bio import Entrez, SeqIO
 
-# from pinky.smiles import smilin
-# from pinky.fingerprints import ecfp
+from pinky.smiles import smilin
+from pinky.fingerprints import ecfp
 
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
