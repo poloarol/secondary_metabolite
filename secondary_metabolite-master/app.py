@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Tuple
 from multiprocessing import Pool
 from numpy.lib import stride_tricks
 
+import pycm
 import pandas as pd
 import numpy as np
 
@@ -28,6 +29,8 @@ from utilities.analysis import NLP
 from utilities.analysis import Clustering
 from utilities.analysis import Supervised
 from utilities.analysis import DimensionalReduction
+
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, matthews_corrcoef
 
 from chemspipy import ChemSpider
 
@@ -228,49 +231,37 @@ def split(filename: str):
     np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'), train, comments='', delimiter=',')
     np.savetxt(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'), test, comments='', delimiter=',')
 
-def classify(dim: int = 3):
+def evaluate_antismash(dim: int = 3):
 
-    seed, nan = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\validation.csv'))
-    seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\4_class_mb.csv'))
+    antismash = pd.read_csv(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
+    seed, train = load_files()
 
-    # scaler = joblib.load(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'))
-    scaler = RobustScaler()
-    scaler.fit(nan.iloc[:, 1:])
+    rb: Any = None
+    with open(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'), 'rb') as f:
+        rb = joblib.load(f)
+    
+    dim_reduction = DimensionalReduction(seed, train)
+    umap = dim_reduction.umap_learn(in_metric="chebyshev", out_metric='euclidean', neighbours=30, distance=0.1, weight=0.3)
 
-    scaled_train = np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:])))
-    scaled_train = pd.DataFrame(scaled_train)
-    scaled_test = np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:])))
-    scaled_test = pd.DataFrame(scaled_test)
+    transformed_train = pd.DataFrame(np.column_stack((antismash.iloc[:, 0], umap.transform(rb.transform(antismash.iloc[:, 1:])))))
 
-    dim_reduction = DimensionalReduction(seed, scaled_train)
+    a, b = train_test_split(transformed_train, test_size=0.2, random_state=seed)
+    supervised = Supervised(seed=seed, train=a, test=b)
 
-    umap, train = dim_reduction.umap(neighbours=75, input_metric='chebyshev', output_metric='chebyshev')
-    test_transformed = dim_reduction.transform(umap, scaled_test.iloc[:, 1:])
+    rf = supervised.rforest()
 
-    test = pd.DataFrame(np.column_stack((test.iloc[:, 0], test_transformed)))
+    predicted = rf.predict(transformed_train.iloc[:, 1:])
 
-    models = {}
+    cm  = pycm.ConfusionMatrix(actual_vector=np.array(antismash.iloc[:, 0]), predict_vector=predicted)
+    print(cm)
 
-    supervised = Supervised(seed, train, test)
+    print('==========================================================================================================')
 
-    models['rf'] = supervised.rforest()
-    models['ada_rf'] = supervised.adaRforest()
-    models['knn'] = supervised.knn()
-    models['nn'] = supervised.neural_network()
-
-    for key, model in models.items():
-        if key != 'dnn':
-            acc, bal_acc, cohen, matt = supervised.evaluate_model(model, 3, 5)
-            print('{}'.format(key))
-            print('Accuracy: {} +/- {}'.format(round(statistics.mean(acc), 3), round(statistics.stdev(acc), 3)))
-            print('Bal. Accuracy: {} +/- {}'.format(round(statistics.mean(bal_acc), 3) , round(statistics.stdev(bal_acc), 3)))
-            print("Cohen's Kappa: {} +/- {}".format(round(statistics.mean(cohen), 3) , round(statistics.stdev(cohen), 3)))
-            print('Matt. Corr. Coef: {} +/- {}'.format(round(statistics.mean(matt), 3) ,round(statistics.stdev(matt), 3)))
-
-            a, b = supervised.contigency_table(model)
-            print(b)
-
+    print("Accuracy: {}".format(accuracy_score(y_true=np.array(antismash.iloc[:, 0]), y_pred=predicted)))
+    print("Bal. accuracy: {}".format(balanced_accuracy_score(y_true=np.array(antismash.iloc[:, 0]), y_pred=predicted)))
+    print("Cohen's Kappa: {}".format(cohen_kappa_score(y1=np.array(antismash.iloc[:, 0]), y2=predicted)))
+    print("Matt. Corr. Coef. {}".format(matthews_corrcoef(y_true=np.array(antismash.iloc[:, 0]), y_pred=predicted)))
+  
 def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: str = 'chebyshev', seed: int = 1042):  
 
     seed, train = load_files()
@@ -283,8 +274,8 @@ def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: 
     with open(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'), 'rb') as f:
         rb = joblib.load(f)
     
-    with open(os.path.join(os.getcwd(), 'bgc\\models\\umap\\umap_chebyshev_euclidean_30_0.1_0.3.model'), 'rb') as f:
-        umap = joblib.load(f)
+    # with open(os.path.join(os.getcwd(), 'bgc\\models\\umap\\umap_chebyshev_euclidean_30_0.1_0.3.model'), 'rb') as f:
+    #     umap = joblib.load(f)
     
     transformed_train = pd.DataFrame(train.iloc[:, 0], umap.transform(train.iloc[:, 1:]))
     tmp_train, tmp_test = train_test_split(transformed_train, test_size=0.33, random_state=seed)
@@ -660,6 +651,7 @@ if __name__ == "__main__":
     parser.add_argument('-g', '--clustering', help="Cluster Tanimoto Scores")
     parser.add_argument('-bu', '--best_umap', help='Build best UMAP models and save them')
     parser.add_argument('-cm', '--confusion', help="Confusion Matrix ...")
+    parser.add_argument('-ev', '--evaluate', help='Evaluate against antiSMASH')
 
     args = parser.parse_args()
 
@@ -718,6 +710,8 @@ if __name__ == "__main__":
         get_best_umap_models()
     elif args.confusion:
         get_confusion_matrix()
+    elif args.evaluate:
+        evaluate_antismash()
     else:
         try:
             parse_json()

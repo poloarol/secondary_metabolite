@@ -2,6 +2,9 @@
 /secondary_metabolite-master/tmp
 /secondary_metabolite-master/utilities/__pycache__
 /secondary_metabolite-master/mibig/*.gz
-/secondary_metabolite-master/bgc/dataset/
 /secondary_metabolite-master/bgc/mibig/
+/secondary_metabolite-master/bgc/dataset
 /secondary_metabolite-master/bgc/antismash
+
+*.xlsx
+*.newick
