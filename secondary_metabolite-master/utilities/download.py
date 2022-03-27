@@ -89,6 +89,6 @@ class Scraper(object):
 
         file_path: str = os.path.join(os.getcwd(), 'tmp\\gbk\\{}.gbk'.format(self.identifier))
 
-        with open(file_path, 'wb') as temp_file:
+        with open(file_path, 'w') as temp_file:
             temp_file.write(data.encode('utf-8'))
     

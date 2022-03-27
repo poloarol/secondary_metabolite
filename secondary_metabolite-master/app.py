@@ -16,8 +16,8 @@ from scipy.cluster.hierarchy import dendrogram
 
 from Bio import Entrez, SeqIO
 
-from pinky.smiles import smilin
-from pinky.fingerprints import ecfp
+# from pinky.smiles import smilin
+# from pinky.fingerprints import ecfp
 
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split
@@ -32,10 +32,10 @@ from utilities.analysis import DimensionalReduction
 
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, matthews_corrcoef
 
-from chemspipy import ChemSpider
+# from chemspipy import ChemSpider
 
-import pubchempy
-from pubchempy import Compound
+# import pubchempy
+# from pubchempy import Compound
 
 Entrez.email = "adjon081@uottawa.ca"
 
@@ -54,17 +54,12 @@ def load_files():
 
     """
     
-    # seed, train = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\train.csv'))
-    # seed, test = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\antismash\\test.csv'))
-
-    seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\dataset\\mibig\\mibig.csv'))
-
-    scaler = RobustScaler().fit(data.iloc[:, 1:])
-
-    train = np.column_stack((data.iloc[:, 0].astype(int), scaler.transform(data.iloc[:, 1:])))
-    train = pd.DataFrame(train)
+    seed, data = shuffle(os.path.join(os.getcwd(), 'bgc\\mibig\\mibig.csv'))
     
-    return seed, train
+    scaler = RobustScaler().fit(data.iloc[:, 1:])
+    data = pd.DataFrame(np.column_stack((data.iloc[:, 0].astype(int), scaler.transform(data.iloc[:, 1:]).astype(float))))
+
+    return seed, data
 
 def umap_learn(metric):
     """
@@ -79,11 +74,16 @@ def umap_learn(metric):
         metric (tuple[str, str]) e.g. (euclidean, euclidean)
     """
 
-    seed, train = load_files()
+    seed, data = load_files()
+    train, test = train_test_split(data, test_size=0.2, random_state=seed)
 
+    scaler = RobustScaler().fit(train.iloc[:, 1:])
+
+    train = pd.DataFrame(np.column_stack((train.iloc[:, 0], scaler.transform(train.iloc[:, 1:]).astype(float))))
+    test = pd.DataFrame(np.column_stack((test.iloc[:, 0], scaler.transform(test.iloc[:, 1:]).astype(float))))
     dim_reduction = DimensionalReduction(seed, train)
 
-    neighbours: List = [15, 30, 45, 60, 75, 90]
+    neighbours: List = [15, 30, 45, 60]
     distances: List = [0.1, 0.2, 0.3, 0.4, 0.5]
     weight: List = [0.1, 0.2, 0.3, 0.4, 0.5]
 
@@ -99,31 +99,33 @@ def umap_learn(metric):
 
         print('UMAP Evaluation - num. of neighbours: {} & Min. Dist: {} & Weight: {}'.format(permutation[0], permutation[1], permutation[2]))
 
-        rb = RobustScaler()
-        rb.fit(train.iloc[:, 1:])
-
-        with open(os.path.join(os.getcwd(), 'bgc\\models\\scaler\\RobustScaler.model'), 'wb') as f:
-            joblib.dump(rb, f)
-
         umap = dim_reduction.umap_learn(in_metric=metric[0], out_metric=metric[1], neighbours=permutation[0], distance=permutation[1], weight=permutation[2])
-        transformed_train = pd.DataFrame(np.column_stack((train.iloc[:, 0], umap.transform(rb.transform(train.iloc[:, 1:])))))
+        transformed_train = pd.DataFrame(np.column_stack((data.iloc[:, 0], umap.transform(data.iloc[:, 1:]))))
+        transformed_test = pd.DataFrame(np.column_stack((test.iloc[:, 0], umap.transform(test.iloc[:, 1:]))))
 
-        a = train.iloc[:, 1:].to_numpy()
-        b = transformed_train.iloc[:, 1:].to_numpy()
+        trusts = []
 
-        trust = dim_reduction.trustworthiness(a, b, permutation[0], metric[1])
-            
-        a, b = train_test_split(transformed_train, test_size=0.33, random_state=seed)
+        for i in range(10):
+
+            a = test.iloc[:, 1:].to_numpy()
+            b = transformed_test.iloc[:, 1:].to_numpy()
+
+            c = pd.DataFrame(np.column_stack((a,b)))
+            c = c.sample(frac=0.8).reset_index(drop=True)
+
+            a, b = c.iloc[:, 0:300].to_numpy(), c.iloc[:, 300:].to_numpy()
+
+            trust = dim_reduction.trustworthiness(a, b, permutation[0], metric[1])
+            trusts.append(trust)
+
+        avg_trust = sum(trusts)/len(trusts)
 
         try:
-
-            evaluate_model(seed=seed, train=a, test=b, trust=trust, df=analysis_data, params=permutation)
-
+            evaluate_model(seed=seed, train=transformed_train, test=transformed_test, trust=avg_trust, df=analysis_data, params=permutation)
         except Exception as e:
-
             print(e.__repr__())
     
-    analysis_data.to_excel('{}_{}.xlsx'.format(metric[0], metric[1]), index=False)
+    analysis_data.to_excel('{}_{}_new.xlsx'.format(metric[0], metric[1]), index=False)
 
 def lda_learn(n_component: int):
     
@@ -197,6 +199,7 @@ def evaluate_model(seed: int, train: pd.DataFrame, test: pd.DataFrame, trust: fl
         matt_corr: int = statistics.mean(matt_corr_coef)
         
         new_row = [key, params[0], params[1], params[2], trust, acc, bal_acc, c_kappa, matt_corr]
+        print(new_row)
 
         df.loc[len(df.index)] = new_row
 
@@ -286,7 +289,7 @@ def tuning(neighbour: int = 90, input_metric: str = 'chebyshev', output_metric: 
 def shuffle(filename: str):
     """ shuffle the pandas dataset and divide it into a 4 (train) : 1 (test) ratio. """
 
-    seed: int = 42
+    seed: int = 1042
     data = pd.read_csv(filename, low_memory=True, header=None)
     data = clean_dataset(data)
     data = data.sample(frac=1).reset_index(drop=True)
@@ -301,29 +304,31 @@ def clean_dataset(df):
     print('done - cleaning dataset')
     return df[indices_to_keep].astype(np.float64)
 
-def mibig(file):
+def download_mibig(file):
     """ access the mibig database, download genbank files and convert them to vectors"""
     
     data = np.array([])
 
-    if os.path.isfile(os.path.join(os.getcwd(), 'bgc\\mibig\\nps\\align\\{0}'.format(file))):
-        with open(os.path.join(os.getcwd(), 'bgc\\mibig\\nps\\align\\{0}'.format(file))) as lines:
+    if os.path.isfile(os.path.join(os.getcwd(), 'bgc\\mibig\\nps\\{0}'.format(file))):
+        with open(os.path.join(os.getcwd(), 'bgc\\mibig\\nps\\{0}'.format(file))) as lines:
             for line in lines:
                 scraper = Scraper(line.strip())
                 scraper.mibig_download()
-                path = os.path.join(os.getcwd(), 'tmp\\gbk\\{}.gbk'.format(line.strip()))
-                rb = ReadGB(path)
-                rb.to_fasta(os.path.join(os.getcwd(), 'bgc\\mibig\\bgcs\\{}.fasta'.format(line.strip())), line.strip())
-                vector = rb.get_vector()
-                vector = vector.ravel()
+        #         path = os.path.join(os.getcwd(), 'tmp\\gbk\\{}.gbk'.format(line.strip()))
+        #         rb = ReadGB(path)
+        #         # rb.to_fasta(os.path.join(os.getcwd(), 'bgc\\mibig\\bgcs\\{}.fasta'.format(line.strip())), line.strip())
+        #         vector = rb.get_vector()
+        #         vector = vector.ravel()
+        #         # vector = vector.to_list()
+        #         # vector.insert(0, values[])
 
-                if vector.shape[0] == 300:
-                    if data.size == 0:
-                        data = np.array([vector])
-                    elif vector.size != 0:
-                        data = np.concatenate((data, np.array([vector])))
+        #         if vector.shape[0] == 300:
+        #             if data.size == 0:
+        #                 data = np.array([vector])
+        #             elif vector.size != 0:
+        #                 data = np.concatenate((data, np.array([vector])))
                     
-        np.savetxt('bgc\\mibig\\np_vecs\\{}_uniprot2vec.csv'.format(file.split('.')[0]), data, delimiter=',')
+        # np.savetxt('bgc\\mibig\\np_vecs\\{}_uniprot2vec.csv'.format(file.split('.')[0]), data, delimiter=',')
 
 def antismash(file):
     """ Access AntiSmash DB, download datasets and write them as both genbank and fasta. """
@@ -676,7 +681,7 @@ if __name__ == "__main__":
 
     elif args.mibig:
         pool = Pool()
-        pool.map(mibig, os.listdir(os.path.join(os.getcwd(), 'bgc\\mibig\\nps\\align')))
+        pool.map(download_mibig, os.listdir(os.path.join(os.getcwd(), 'bgc\\mibig\\nps')))
     elif args.antismash:
         pool = Pool()
         pool.map(antismash, os.listdir(os.path.join(os.getcwd(), 'bgc\\antismash\\antismash')))

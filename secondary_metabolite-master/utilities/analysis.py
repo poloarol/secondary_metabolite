@@ -59,14 +59,14 @@ class DimensionalReduction(object):
     """
 
     seed: int
-    data: List
+    train: List
 
-    def __post_init__(self):
+    # def __post_init__(self):
 
-        smote = SMOTE(random_state=self.seed, sampling_strategy='not minority') # under sample dataset
-        X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
+    #     smote = SMOTE(random_state=self.seed, sampling_strategy='not majority') # under sample dataset
+    #     X, y = smote.fit_resample(self.data.iloc[:, 1:], self.data.iloc[:, 0])
 
-        self.train = pd.DataFrame(np.column_stack((y, X)))
+    #     self.train = pd.DataFrame(np.column_stack((y, X)))
     
     def umap_learn(self, in_metric: str = 'euclidean', out_metric: str = 'euclidean', components: int = 3, neighbours: int = 15, distance: float = 0.1, weight: float = 0.5) -> UMAP:
 
@@ -94,7 +94,7 @@ class DimensionalReduction(object):
 
         reducer = UMAP(random_state=self.seed, init='random', 
                         metric=in_metric, output_metric=out_metric, n_components=components,
-                        n_neighbors=neighbours, min_dist=distance, target_weight=weight)
+                        n_neighbors=neighbours, min_dist=distance, target_weight=weight, transform_seed=self.seed)
         
         reducer.fit(self.train.iloc[:, 1:], self.train.iloc[:, 0])
 
@@ -230,8 +230,8 @@ class DimensionalReduction(object):
         np.fill_diagonal(dist_X, np.inf)
         ind_X = np.argsort(dist_X, axis=1)
         # `ind_X[i]` is the index of sorted distances between i and other samples
-        ind_X_embedded = NearestNeighbors(n_neighbors).fit(embedded).kneighbors(
-            return_distance=False)
+        nn = NearestNeighbors(n_neighbors=n_neighbors)
+        ind_X_embedded = nn.fit(embedded).kneighbors(return_distance=False)
 
         # We build an inverted index of neighbors in the input space: For sample i,
         # we define `inverted_index[i]` as the inverted index of sorted distances:
